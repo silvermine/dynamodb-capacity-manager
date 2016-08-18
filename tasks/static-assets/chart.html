@@ -1,0 +1,79 @@
+<html>
+   <head>
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script type="text/javascript">
+         function setData(data) {
+            google.charts.load('current', { packages: [ 'corechart', 'controls' ] });
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+               var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard')),
+                   chartData, chart, control, chartOptions;
+
+               data = data.map(function(row, i) {
+                  if (i === 0) {
+                     return row;
+                  }
+
+                  return row.map(function(val, c) {
+                     if (c === 0) {
+                        return new Date(val);
+                     }
+
+                     return Number(val);
+                  });
+               });
+
+               chartData = new google.visualization.arrayToDataTable(data);
+
+               control = new google.visualization.ControlWrapper({
+                  controlType: 'ChartRangeFilter',
+                  containerId: 'control',
+                  state: {
+                     range: {
+                        start: data[1][0],
+                        end: data[Math.floor(data.length / 7)][0]
+                     }
+                  },
+                  options: {
+                     filterColumnIndex: 0,
+                     ui: {
+                        chartOptions: {
+                           height: 100,
+                           width: '100%',
+                           chartArea: {
+                              width: '80%'
+                           }
+                        },
+                        chartView: {
+                           columns: [ 0, 1, 2 ]
+                        }
+                     }
+                  },
+               });
+
+               chart = new google.visualization.ChartWrapper({
+                  chartType: 'LineChart',
+                  containerId: 'chart'
+               });
+
+               chart.setOption('height', 600);
+               chart.setOption('width', '100%');
+               chart.setOption('legend.position', 'top');
+               chart.setOption('title', 'DynamoDB Capacity Manager Analysis');
+
+               dashboard.bind([ control ], [ chart ]);
+               dashboard.draw(chartData);
+            }
+         }
+      </script>
+      <script type="text/javascript" src="./data.js"></script>
+   </head>
+
+   <body>
+      <div id="dashboard">
+         <div id="chart"></div>
+         <div id="control"></div>
+      </div>
+   </body>
+</html>
