@@ -75,7 +75,7 @@ module.exports = function(grunt) {
                    newValue;
 
                if (i >= 15) {
-                  newValue = boss.getUpdatedCapacity(provisioned, usage, throttling);
+                  newValue = boss.getUpdatedCapacity(provisioned, usage, throttling, datapoint.Timestamp);
                   updateProvisioned(provisioned, newValue, datapoint.Timestamp, previousTimestamp);
                }
 

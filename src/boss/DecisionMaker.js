@@ -8,14 +8,25 @@ var _ = require('underscore'),
 DEFAULT_CONFIG = {
    AbsoluteMinimumProvisioned: 1,
    AbsoluteMaximumProvisioned: 10,
-   MinutesToForecast: 5,
+   MinutesToForecast: 10,
+   PreferredForecastPadding: [
+      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 100 },
+      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 50 },
+      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 10 },
+      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 5 },
+   ],
    MinimumMinutesBetweenIncreases: 0,
+   MaximumIncreaseAmount: [
+      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 100 },
+      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 50 },
+      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 20 },
+   ],
    MinimumMinutesBetweenDecreases: 90,
-   MinimumIncreaseUnits: 1,
-   MaximumIncreaseUnits: [
-      { CurrentCapacityMin: 1, CurrentCapacityMax: 10, Percentage: 100 },
-      { CurrentCapacityMin: 11, CurrentCapacityMax: 100, Percentage: 50 },
-      { CurrentCapacityMin: 101, CurrentCapacityMax: 1000, Percentage: 20 },
+   MinimumDecreaseAmount: [
+      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 50 },
+      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 20 },
+      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 8 },
+      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 2 },
    ],
    AcceptableThrottledRequestsPerTimePeriod: 0,
 };
@@ -24,6 +35,15 @@ module.exports = Class.extend({
 
    init: function(config) {
       this._config = _.extend({}, DEFAULT_CONFIG, config);
+
+      this._rules = [
+         new (require('./rules/ForecastingRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/ForecastPaddingRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/UseForecastForNextCapacityRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/RequireMinimumDecreaseAmountRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/EnforceMaximumIncreaseRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/DisallowTooSoonOrFrequentRule'))(this._config), // eslint-disable-line global-require
+      ];
    },
 
    /**
@@ -84,47 +104,29 @@ module.exports = Class.extend({
     * @param {Object} provisioned - the table's current capacity, etc - see note above
     * @param {Array} usageData - the used capacity metrics - see note above
     * @param {Array} throttlingData - the used capacity metrics - see note above
+    * @param {Date} currentTime - leave this undefined unless you're running historical analysis
     * @returns {Integer} the new capacity value for the table or index
     */
-   getUpdatedCapacity: function(provisioned, usageData, throttlingData) {
-      var forecastUsageValue = this.forecastUsage(usageData),
-          recentUnacceptableThrottledRequestCount = this.getRecentUnacceptableThrottledRequestCount(throttlingData),
-          nextAllowedIncrease = moment.unix(provisioned.LastIncreaseDateTime).add(this._config.MinimumMinutesBetweenIncreases, 'minutes'),
-          nextAllowedDecrease = moment.unix(provisioned.LastDecreaseDateTime).add(this._config.MinimumMinutesBetweenDecreases, 'minutes');
+   getUpdatedCapacity: function(provisioned, usageData, throttlingData, currentTime) {
+      var state;
 
-      if (forecastUsageValue > provisioned.CapacityUnits) {
-         // trending up, may need to consider an increase
-         if (nextAllowedIncrease.isAfter(moment())) {
-            // short-circuit: do not allow an increase sooner than configured min minutes between increases
-            return provisioned.CapacityUnits;
+      state = {
+         provisioning: provisioned,
+         usage: usageData,
+         throttling: throttlingData,
+         currentTime: moment(currentTime) || moment(),
+         nextCapacity: provisioned.CapacityUnits,
+         isAllowedToChange: !_.isEmpty(usageData),
+      };
+
+      _.each(this._rules, function(rule) {
+         if (state.isAllowedToChange) {
+            rule.apply(state);
+            // console.log(_.omit(state, 'usage', 'throttling', 'currentTime'));
          }
+      });
 
-         // TODO: implement real rules
-         return forecastUsageValue;
-      }
-
-      // trending down, may need to consider a decrease
-      if (nextAllowedDecrease.isAfter(moment()) || provisioned.NumberOfDecreasesToday >= 4) {
-         // short-circuit: do not allow an decrease sooner than configured min minutes between increases
-         // or if we've already hit our max decrease limit
-         return provisioned.CapacityUnits;
-      }
-
-      // TODO: implement real rules
-      return forecastUsageValue;
+      return state.isAllowedToChange ? state.nextCapacity : provisioned.CapacityUnits;
    },
-
-
-   forecastUsage: function(usageData) {
-      // TODO: implement
-      return Math.ceil(_.chain(usageData).pluck('Value').max().value() + 10);
-   },
-
-
-   getRecentUnacceptableThrottledRequestCount: function(throttlingData) {
-      // TODO: implement
-      return 0;
-   },
-
 
 });

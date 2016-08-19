@@ -1,0 +1,10 @@
+{
+
+   "extends": "eslint-config-silvermine/node-tests",
+
+   "rules": {
+      "no-process-env": "off",
+      "no-empty-function": "off"
+   }
+
+}
