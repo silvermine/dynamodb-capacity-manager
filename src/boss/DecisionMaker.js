@@ -8,12 +8,12 @@ var _ = require('underscore'),
 DEFAULT_CONFIG = {
    AbsoluteMinimumProvisioned: 1,
    AbsoluteMaximumProvisioned: 10,
-   MinutesToForecast: 10,
+   MinutesToForecast: 5,
    PreferredForecastPadding: [
-      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 100 },
-      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 50 },
-      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 10 },
-      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 5 },
+      { IfGreaterThan: 0, IfLessThanOrEqual: 30, Percentage: 100 },
+      { IfGreaterThan: 30, IfLessThanOrEqual: 100, Percentage: 50 },
+      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 25 },
+      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 15 },
    ],
    MinimumMinutesBetweenIncreases: 0,
    MaximumIncreaseAmount: [
@@ -21,12 +21,10 @@ DEFAULT_CONFIG = {
       { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 50 },
       { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 20 },
    ],
-   MinimumMinutesBetweenDecreases: 90,
+   MinimumMinutesBetweenDecreases: 45,
    MinimumDecreaseAmount: [
-      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 50 },
-      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 20 },
-      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 8 },
-      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 2 },
+      { IfGreaterThan: 0, IfLessThanOrEqual: 100, Percentage: 50 },
+      { IfGreaterThan: 100, IfLessThanOrEqual: 1000000, Percentage: 30 },
    ],
    AcceptableThrottledRequestsPerTimePeriod: 0,
 };
