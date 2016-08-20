@@ -5,7 +5,8 @@ var _ = require('underscore'),
     fs = require('fs'),
     moment = require('moment'),
     yaml = require('js-yaml'),
-    Boss = require('../src/boss/DecisionMaker');
+    Boss = require('../src/boss/DecisionMaker'),
+    HOURS_OF_DATA_FOR_BOSS = 1;
 
 module.exports = function(grunt) {
 
@@ -71,7 +72,7 @@ module.exports = function(grunt) {
             };
 
             return _.map(data, function(datapoint, i) {
-               var usage = _.last(_.first(data, i + 1), 60),
+               var usage = _.last(_.first(data, i + 1), (HOURS_OF_DATA_FOR_BOSS * 60)),
                    newValue;
 
                if (i >= 15) {
