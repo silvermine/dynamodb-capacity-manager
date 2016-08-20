@@ -41,6 +41,7 @@ module.exports = Class.extend({
          new (require('./rules/RequireMinimumDecreaseAmountRule'))(this._config), // eslint-disable-line global-require
          new (require('./rules/EnforceMaximumIncreaseRule'))(this._config), // eslint-disable-line global-require
          new (require('./rules/DisallowTooSoonOrFrequentRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/DisallowLeavingTooFewDecreasesForFutureSlots'))(this._config), // eslint-disable-line global-require
       ];
    },
 
