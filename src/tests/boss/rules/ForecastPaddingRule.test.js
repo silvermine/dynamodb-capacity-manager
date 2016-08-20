@@ -14,6 +14,7 @@ describe('ForecastPaddingRule', function() {
          rule.apply(state);
 
          expect(state.forecastUsage).to.be.within(109.9, 110.1);
+         expect(state.originalForecastUsage).to.eql(100);
       });
 
    });
