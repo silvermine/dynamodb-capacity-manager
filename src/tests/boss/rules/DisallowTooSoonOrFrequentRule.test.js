@@ -14,8 +14,8 @@ describe('DisallowTooSoonOrFrequent', function() {
          state = {
             provisioning: {
                CapacityUnits: 100,
-               LastIncreaseDateTime: 1471550400, // 2016-08-18T20:00:00.000Z
-               LastDecreaseDateTime: 1471550400, // 2016-08-18T20:00:00.000Z
+               LastIncreaseDateTime: new Date('2016-08-18T20:00:00.000Z'),
+               LastDecreaseDateTime: new Date('2016-08-18T20:00:00.000Z'),
                NumberOfDecreasesToday: numberDec,
             },
             currentTime: moment(time),

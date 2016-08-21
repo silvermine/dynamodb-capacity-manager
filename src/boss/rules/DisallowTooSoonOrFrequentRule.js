@@ -8,8 +8,8 @@ module.exports = BaseRule.extend({
    apply: function(state) {
       var lastIncrease = state.provisioning.LastIncreaseDateTime,
           lastDecrease = state.provisioning.LastDecreaseDateTime,
-          nextAllowedIncrease = moment.unix(lastIncrease).add(this._config.MinimumMinutesBetweenIncreases, 'minutes'),
-          nextAllowedDecrease = moment.unix(lastDecrease).add(this._config.MinimumMinutesBetweenDecreases, 'minutes');
+          nextAllowedIncrease = moment(lastIncrease).add(this._config.MinimumMinutesBetweenIncreases, 'minutes'),
+          nextAllowedDecrease = moment(lastDecrease).add(this._config.MinimumMinutesBetweenDecreases, 'minutes');
 
       if (this.isIncreasing(state) && nextAllowedIncrease.isAfter(state.currentTime)) {
          state.isAllowedToChange = false;
