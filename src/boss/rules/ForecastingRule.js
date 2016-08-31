@@ -16,7 +16,9 @@ module.exports = BaseRule.extend({
 
 
    apply: function(state) {
-      state.forecastUsage = this._forecaster.forecast(state.usage, this._config.MinutesToForecast);
+      var forecast = this._forecaster.forecast(state.usage, this._config.MinutesToForecast) || 1;
+
+      state.forecastUsage = Math.max(forecast, 1);
    },
 
 });

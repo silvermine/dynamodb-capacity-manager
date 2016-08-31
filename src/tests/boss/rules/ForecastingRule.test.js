@@ -20,20 +20,34 @@ describe('ForecastingRule', function() {
 
    describe('apply', function() {
 
-      it('sets the forecastUsage correctly', function() {
+      function runTest(forecastValue, expectedForecast) {
          var rule = new Rule({ MinutesToForecast: 10 }),
              state = { usage: 'usage-array' },
              forecaster = { forecast: function() {} },
              mock = sinon.mock(forecaster);
 
-         mock.expects('forecast').withExactArgs(state.usage, 10).returns(20);
+         mock.expects('forecast').withExactArgs(state.usage, 10).returns(forecastValue);
 
          rule.setForecaster(forecaster);
 
          rule.apply(state);
 
-         expect(state.forecastUsage).to.eql(20);
+         expect(state.forecastUsage).to.eql(expectedForecast);
          mock.verify();
+      }
+
+      it('sets the forecastUsage correctly', function() {
+         runTest(20, 20);
+      });
+
+      it('does not allow zero, negative, or NaN values to be forecast', function() {
+         runTest(0, 1);
+         runTest(-1, 1);
+         runTest(NaN, 1);
+         runTest(null, 1);
+         runTest(-1000, 1);
+         runTest(-2.6, 1);
+         runTest(0.00001, 1);
       });
 
    });
