@@ -1,7 +1,7 @@
 {
   "name": "dynamodb-capacity-manager",
   "version": "0.9.0",
-  "description": "Lambda function for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage",
+  "description": "Library for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage. Can be run as a Lambda function.",
   "main": "src/index.js",
   "scripts": {
     "test": "grunt standards && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec 'src/tests/**/*.test.js'"
@@ -30,10 +30,10 @@
     "underscore": "1.8.3"
   },
   "devDependencies": {
+    "aws-sdk": "2.5.4",
     "coveralls": "2.11.12",
     "eslint": "3.3.1",
-    "eslint-config-silvermine": "0.9.3",
-    "eslint-plugin-silvermine": "0.9.0",
+    "eslint-config-silvermine": "1.0.0",
     "expect.js": "0.3.1",
     "grunt": "1.0.1",
     "grunt-eslint": "19.0.0",
