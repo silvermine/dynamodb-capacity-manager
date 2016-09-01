@@ -2,37 +2,12 @@
 
 var _ = require('underscore'),
     Class = require('class.extend'),
-    moment = require('moment'),
-    DEFAULT_CONFIG;
-
-DEFAULT_CONFIG = {
-   AbsoluteMinimumProvisioned: 1,
-   AbsoluteMaximumProvisioned: 10,
-   MinutesToForecast: 5,
-   PreferredForecastPadding: [
-      { IfGreaterThan: 0, IfLessThanOrEqual: 30, Percentage: 100 },
-      { IfGreaterThan: 30, IfLessThanOrEqual: 100, Percentage: 50 },
-      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 25 },
-      { IfGreaterThan: 1000, IfLessThanOrEqual: 1000000, Percentage: 15 },
-   ],
-   MinimumMinutesBetweenIncreases: 0,
-   MaximumIncreaseAmount: [
-      { IfGreaterThan: 0, IfLessThanOrEqual: 10, Percentage: 100 },
-      { IfGreaterThan: 10, IfLessThanOrEqual: 100, Percentage: 50 },
-      { IfGreaterThan: 100, IfLessThanOrEqual: 1000, Percentage: 20 },
-   ],
-   MinimumMinutesBetweenDecreases: 45,
-   MinimumDecreaseAmount: [
-      { IfGreaterThan: 0, IfLessThanOrEqual: 100, Percentage: 50 },
-      { IfGreaterThan: 100, IfLessThanOrEqual: 1000000, Percentage: 30 },
-   ],
-   AcceptableThrottledRequestsPerTimePeriod: 0,
-};
+    moment = require('moment');
 
 module.exports = Class.extend({
 
    init: function(config) {
-      this._config = _.extend({}, DEFAULT_CONFIG, config);
+      this._config = config;
 
       this._rules = [
          new (require('./rules/ForecastingRule'))(this._config), // eslint-disable-line global-require
@@ -65,8 +40,8 @@ module.exports = Class.extend({
     * ```
     * {
     *    NumberOfDecreasesToday: 0,
-    *    LastIncreaseDateTime: 401643000.123,
-    *    LastDecreaseDateTime: 690921000.123,
+    *    LastIncreaseDateTime: JS Date Object,
+    *    LastDecreaseDateTime: JS Date Object,
     *    CapacityUnits: 100,
     * }
     * ```
