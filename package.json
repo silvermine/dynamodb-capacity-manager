@@ -1,7 +1,7 @@
 {
   "name": "dynamodb-capacity-manager",
   "version": "0.9.0",
-  "description": "Lambda function for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage",
+  "description": "Library for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage. Can be run as a Lambda function.",
   "main": "src/index.js",
   "scripts": {
     "test": "grunt standards && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec 'src/tests/**/*.test.js'"
