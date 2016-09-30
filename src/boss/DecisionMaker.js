@@ -11,6 +11,7 @@ module.exports = Class.extend({
 
       this._rules = [
          new (require('./rules/ForecastingRule'))(this._config), // eslint-disable-line global-require
+         new (require('./rules/RespondToThrottlingRule'))(this._config), // eslint-disable-line global-require
          new (require('./rules/ForecastPaddingRule'))(this._config), // eslint-disable-line global-require
          new (require('./rules/UseForecastForNextCapacityRule'))(this._config), // eslint-disable-line global-require
          new (require('./rules/EnforceAbsoluteMinimumRule'))(this._config), // eslint-disable-line global-require

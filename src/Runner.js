@@ -210,7 +210,7 @@ module.exports = Class.extend({
           promises;
 
       promises = [
-         stats.getStatistic(consumedStatName, resource, minutesToRetrieve, true, minutesToIgnore, true),
+         stats.getStatistic(consumedStatName, resource, minutesToRetrieve, true, minutesToIgnore),
          stats.getStatistic(throttledStatName, resource, minutesToRetrieve, true, minutesToIgnore),
       ];
 

@@ -9,9 +9,7 @@ var _ = require('underscore'),
 
 module.exports = Class.extend({
 
-   // TODO: stop disabling this rule:
-   // eslint-disable-next-line max-params
-   getStatistic: function(metricName, resource, minutesBack, fillZeroes, minutesToIgnore, divide) {
+   getStatistic: function(metricName, resource, minutesBack, fillZeroes, minutesToIgnore) {
       var endTime = moment().utc(),
           startTime, params;
 
@@ -37,16 +35,12 @@ module.exports = Class.extend({
 
       return Q.ninvoke(cloudwatch, 'getMetricStatistics', params)
          .then(function(resp) {
+            _.each(resp.Datapoints, function(point) {
+               point.Sum = point.Sum / 60;
+            });
+
             return this._fillAsNeeded(resp.Datapoints, startTime, endTime, fillZeroes);
-         }.bind(this))
-         .then(function(points) {
-            if (divide) {
-               _.each(points, function(point) {
-                  point.value = point.value / 60;
-               });
-            }
-            return points;
-         });
+         }.bind(this));
    },
 
 
