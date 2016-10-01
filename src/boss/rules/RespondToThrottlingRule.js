@@ -18,7 +18,7 @@ module.exports = BaseRule.extend({
       var forecast = this._forecaster.forecast(state.throttling, this._config.MinutesToForecast) || 1;
 
       if (forecast > 1) {
-         state.forecastUsage = Math.max(state.forecastUsage, forecast, 1);
+         state.forecastUsage = Math.max(state.forecastUsage + forecast, 1);
       }
    },
 

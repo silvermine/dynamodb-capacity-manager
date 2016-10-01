@@ -37,21 +37,21 @@ describe('RespondToThrottlingRule', function() {
       }
 
       it('sets the forecastUsage correctly - usage forecast is lower than throttling', function() {
-         runTest(10, 20, 20);
+         runTest(10, 20, 30);
       });
 
       it('sets the forecastUsage correctly - usage forecast is higher than throttling', function() {
-         runTest(20, 10, 20);
+         runTest(20, 10, 30);
       });
 
       it('does not allow zero, negative, or NaN values to be forecast', function() {
-         runTest(1, 0, 1);
-         runTest(1, -1, 1);
-         runTest(1, NaN, 1);
-         runTest(1, null, 1);
-         runTest(1, -1000, 1);
-         runTest(1, -2.6, 1);
-         runTest(1, 0.00001, 1);
+         runTest(10, 0, 10);
+         runTest(10, -1, 10);
+         runTest(10, NaN, 10);
+         runTest(10, null, 10);
+         runTest(10, -1000, 10);
+         runTest(10, -2.6, 10);
+         runTest(10, 0.00001, 10);
       });
 
    });
