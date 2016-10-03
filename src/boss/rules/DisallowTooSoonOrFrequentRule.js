@@ -9,7 +9,13 @@ module.exports = BaseRule.extend({
       var lastIncrease = state.provisioning.LastIncreaseDateTime,
           lastDecrease = state.provisioning.LastDecreaseDateTime,
           nextAllowedIncrease = moment(lastIncrease).add(this._config.MinimumMinutesBetweenIncreases, 'minutes'),
-          nextAllowedDecrease = moment(lastDecrease).add(this._config.MinimumMinutesBetweenDecreases, 'minutes');
+          nextAllowedDecAfterDec = moment(lastDecrease).add(this._config.MinimumMinutesBetweenDecreases, 'minutes'),
+          nextAllowedDecAfterInc = moment(lastIncrease).add(this._config.MinimumMinutesBeforeDecreaseAfterIncrease, 'minutes'),
+          nextAllowedDecrease = nextAllowedDecAfterDec;
+
+      if (nextAllowedDecAfterInc.isAfter(nextAllowedDecAfterDec)) {
+         nextAllowedDecrease = nextAllowedDecAfterInc;
+      }
 
       if (this.isIncreasing(state) && nextAllowedIncrease.isAfter(state.currentTime)) {
          state.isAllowedToChange = false;
