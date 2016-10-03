@@ -6,7 +6,8 @@ var moment = require('moment'),
 module.exports = BaseRule.extend({
 
    apply: function(state) {
-      var lastIncrease = state.provisioning.LastIncreaseDateTime,
+      var maxDecreases = this._config.MaximumDecreasesToUsePerDay,
+          lastIncrease = state.provisioning.LastIncreaseDateTime,
           lastDecrease = state.provisioning.LastDecreaseDateTime,
           nextAllowedIncrease = moment(lastIncrease).add(this._config.MinimumMinutesBetweenIncreases, 'minutes'),
           nextAllowedDecAfterDec = moment(lastDecrease).add(this._config.MinimumMinutesBetweenDecreases, 'minutes'),
@@ -23,7 +24,7 @@ module.exports = BaseRule.extend({
 
       if (this.isDecreasing(state)) {
          // decrease is being planned - should we stop it?
-         if (nextAllowedDecrease.isAfter(state.currentTime) || state.provisioning.NumberOfDecreasesToday >= 4) {
+         if (nextAllowedDecrease.isAfter(state.currentTime) || state.provisioning.NumberOfDecreasesToday >= maxDecreases) {
             state.isAllowedToChange = false;
          }
       }

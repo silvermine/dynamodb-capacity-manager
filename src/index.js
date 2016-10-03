@@ -27,7 +27,7 @@ DEFAULT_RESOURCE_CONFIG = {
       { IfGreaterThan: 100, IfLessThanOrEqual: 1000000, Percentage: 30 },
    ],
    MinimumMinutesBeforeDecreaseAfterIncrease: 15,
-   AcceptableThrottledRequestsPerTimePeriod: 0,
+   MaximumDecreasesToUsePerDay: 4,
 };
 
 
