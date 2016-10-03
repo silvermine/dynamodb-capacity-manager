@@ -81,6 +81,16 @@ builder.defaultRuleConfig({
    MinimumMinutesBetweenIncreases: 3,
 });
 
+// In addition to providing your own default config that works for all
+// resources and capacity types (read and write), you can also have a default
+// that is used only for reads or writes, which will override your own generic
+// default and the library's default.
+builder.defaultRuleConfig(DCM.WRITE, {
+   AbsoluteMinimumProvisioned: 1,
+   AbsoluteMaximumProvisioned: 20,
+   MinimumMinutesBetweenIncreases: 3,
+});
+
 // Then you can also provide an override for specific tables or indexes.
 // These overrides will extend the built-in defaults as well as the defaults
 // that you provided in the `defaultRuleConfig` call shown above.

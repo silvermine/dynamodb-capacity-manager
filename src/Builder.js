@@ -13,6 +13,7 @@ module.exports = Class.extend({
       this._handleReads = false;
       this._handleWrites = false;
       this._userDefaultConfig = {};
+      this._userDefaultConfigByType = {};
       this._perResourceConfigs = {};
    },
 
@@ -43,8 +44,21 @@ module.exports = Class.extend({
       return this.handleReads().handleWrites();
    },
 
-   defaultRuleConfig: function(config) {
-      this._userDefaultConfig = config || {};
+   defaultRuleConfig: function(type, config) {
+      // NOTE: type is optional
+      if (type && config) {
+         if (_.isString(type) && _.isObject(config)) {
+            this._userDefaultConfigByType[type] = config;
+         } else {
+            throw new Error('When both type and config are supplied to defaultRuleConfig, type must be a string, and config an object');
+         }
+      } else if (_.isObject(type)) {
+         // type, not config - because type wasn't supplied
+         this._userDefaultConfig = type || {};
+      } else {
+         throw new Error('When no type is supplied to defaultRuleConfig, the first parameter must be an object');
+      }
+
       return this;
    },
 
@@ -69,9 +83,10 @@ module.exports = Class.extend({
 
    getConfigForResource: function(resource) {
       var perResource = this._perResourceConfigs[resource.name],
-          forType = perResource ? perResource[resource.capacityType] : {};
+          defaultForType = this._userDefaultConfigByType[resource.capacityType],
+          forResourceType = perResource ? perResource[resource.capacityType] : {};
 
-      return _.extend({}, DCM.DEFAULT_RESOURCE_CONFIG, this._userDefaultConfig, forType);
+      return _.extend({}, DCM.DEFAULT_RESOURCE_CONFIG, this._userDefaultConfig, defaultForType, forResourceType);
    },
 
    build: function() {
