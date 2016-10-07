@@ -22,12 +22,12 @@ module.exports = Class.extend({
       return this;
    },
 
-   excludeTable: function(tableName) {
-      this._excludedResources.push(DCM.makeResourceName(tableName));
+   excludeTable: function(tableName, capacityType) {
+      this._excludedResources.push({ name: DCM.makeResourceName(tableName), type: capacityType });
    },
 
-   excludeIndex: function(tableName, indexName) {
-      this._excludedResources.push(DCM.makeResourceName(tableName, indexName));
+   excludeIndex: function(tableName, indexName, capacityType) {
+      this._excludedResources.push({ name: DCM.makeResourceName(tableName, indexName), type: capacityType });
    },
 
    handleReads: function() {

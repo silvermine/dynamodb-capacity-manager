@@ -188,16 +188,34 @@ module.exports = Class.extend({
 
    _removeExcludedResources: function(resources) {
       return _.reject(resources, function(resource) {
-         var excludedResource = _.contains(this._builder._excludedResources, resource.name),
-             excludedType = false;
+         var isExcludedType = false,
+             isExcludedResource;
 
+         isExcludedResource = _.find(this._builder._excludedResources, function(exc) {
+            var isCorrectResource = (exc.name === resource.name);
+
+            if (!isCorrectResource) {
+               return false;
+            }
+
+            if (exc.type) {
+               return resource.capacityType === exc.type;
+            }
+
+            // this is the correct resource, and no exclusion type was specified, so the
+            // user wants the resource entirely excluded, not just one type
+            return true;
+         });
+
+         // now do exclusions based on the type of the resource and whether this runner
+         // actually handles that type
          if (!this._builder._handleReads && resource.capacityType === DCM.READ) {
-            excludedType = true;
+            isExcludedType = true;
          } else if (!this._builder._handleWrites && resource.capacityType === DCM.WRITE) {
-            excludedType = true;
+            isExcludedType = true;
          }
 
-         return excludedResource || excludedType;
+         return isExcludedResource || isExcludedType;
       }.bind(this));
    },
 
