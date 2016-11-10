@@ -1,6 +1,7 @@
 'use strict';
 
-var expect = require('expect.js'),
+var _ = require('underscore'),
+    expect = require('expect.js'),
     moment = require('moment'),
     Rule = require('../../../boss/rules/DisallowTooSoonOrFrequentRule');
 
@@ -8,7 +9,8 @@ describe('DisallowTooSoonOrFrequent', function() {
 
    describe('apply', function() {
 
-      function runTest(nextCapacity, time, numberDec, expectation, configOpts) {
+      // eslint-disable-next-line max-params
+      function runTest(nextCapacity, time, numberDec, expectation, configOpts, provisioningOverride) {
          var state, config, rule;
 
          configOpts = configOpts || {};
@@ -23,6 +25,8 @@ describe('DisallowTooSoonOrFrequent', function() {
             currentTime: moment(time),
             nextCapacity: nextCapacity,
          };
+
+         state.provisioning = _.extend(state.provisioning, provisioningOverride || {});
 
          config = {
             MaximumDecreasesToUsePerDay: configOpts.maxDecreases || 4,
@@ -112,6 +116,14 @@ describe('DisallowTooSoonOrFrequent', function() {
          runTest(50, '2016-08-18T20:15:01.000Z', 0, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:15:01.000Z', 1, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:15:01.000Z', 2, undefined, { decAfterInc: 1, maxDecreases: 3 });
+      });
+
+      it('allows increase when LastIncreaseDateTime is undefined', function() {
+         runTest(200, '2016-08-18T20:05:01.000Z', 0, undefined, {}, { LastIncreaseDateTime: undefined });
+      });
+
+      it('allows decrease when LastDecreaseDateTime is undefined', function() {
+         runTest(50, '2016-08-18T20:05:01.000Z', 0, undefined, {}, { LastDecreaseDateTime: undefined });
       });
 
    });
