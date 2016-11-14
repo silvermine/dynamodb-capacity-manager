@@ -1,6 +1,7 @@
 'use strict';
 
-var moment = require('moment'),
+var _ = require('underscore'),
+    moment = require('moment'),
     BaseRule = require('./BaseRule');
 
 module.exports = BaseRule.extend({
@@ -18,11 +19,11 @@ module.exports = BaseRule.extend({
          nextAllowedDecrease = nextAllowedDecAfterInc;
       }
 
-      if (this.isIncreasing(state) && nextAllowedIncrease.isAfter(state.currentTime)) {
+      if (this.isIncreasing(state) && nextAllowedIncrease.isAfter(state.currentTime) && !_.isUndefined(lastIncrease)) {
          state.isAllowedToChange = false;
       }
 
-      if (this.isDecreasing(state)) {
+      if (this.isDecreasing(state) && !_.isUndefined(lastDecrease)) {
          // decrease is being planned - should we stop it?
          if (nextAllowedDecrease.isAfter(state.currentTime) || state.provisioning.NumberOfDecreasesToday >= maxDecreases) {
             state.isAllowedToChange = false;
