@@ -9,7 +9,13 @@ describe('Runner', function() {
    var builder, runner;
 
    beforeEach(function() {
-      builder = { _handleReads: true, _handleWrites: true };
+      builder = {
+         _handleReads: true,
+         _handleWrites: true,
+         isExcludedResource: function() {
+            return false;
+         },
+      };
       runner = new Runner(builder);
    });
 
@@ -29,61 +35,36 @@ describe('Runner', function() {
          expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1R, tbl1idR, tbl2R, tbl2idR));
       });
 
-      it('removes tables when specified by themselves', function() {
-         builder._excludedResources = [ { name: 'Tbl1' } ];
+      it('removes tables when returned as excluded', function() {
+         builder.isExcludedResource = function(resource) {
+            return resource.name === 'Tbl1';
+         };
          expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1R, tbl1W));
       });
 
-      it('removes indexes when specified by themselves', function() {
-         builder._excludedResources = [ { name: 'Tbl1::_id' } ];
+      it('removes indexes when returned as excluded', function() {
+         builder.isExcludedResource = function(resource) {
+            return resource.name === 'Tbl1::_id';
+         };
          expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1idR, tbl1idW));
       });
 
       it('removes multiple resource types as specified', function() {
-         builder._excludedResources = [ { name: 'Tbl1' }, { name: 'Tbl2::_id' } ];
+         builder.isExcludedResource = function(resource) {
+            return resource.name === 'Tbl1' || resource.name === 'Tbl2::_id';
+         };
          expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1R, tbl1W, tbl2idR, tbl2idW));
-      });
-
-      it('removes a particular capacity type - tables', function() {
-         builder._excludedResources = [ { name: 'Tbl1', type: 'ReadCapacityUnits' } ];
-         expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1R));
-
-         builder._excludedResources = [ { name: 'Tbl1', type: 'WriteCapacityUnits' } ];
-         expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1W));
-      });
-
-      it('removes a particular capacity type - indexes', function() {
-         builder._excludedResources = [ { name: 'Tbl1::_id', type: 'ReadCapacityUnits' } ];
-         expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1idR));
-
-         builder._excludedResources = [ { name: 'Tbl1::_id', type: 'WriteCapacityUnits' } ];
-         expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1idW));
-      });
-
-      it('combines multiple exclusions as expected', function() {
-         builder._excludedResources = [
-            { name: 'Tbl1' },
-            { name: 'Tbl1::_id', type: 'ReadCapacityUnits' },
-            { name: 'Tbl2', type: 'ReadCapacityUnits' },
-            { name: 'Tbl2::_id', type: 'WriteCapacityUnits' },
-         ];
-
-         expect(runner._removeExcludedResources(resources)).to.eql(_.without(resources, tbl1R, tbl1W, tbl1idR, tbl2R, tbl2idW));
       });
 
       it('combines multiple exclusions as expected - with builder only handling one capacity type, and redundant exclusions', function() {
          builder._handleWrites = false;
-         builder._excludedResources = [
-            { name: 'Tbl1' },
-            { name: 'Tbl1', type: 'ReadCapacityUnits' },
-            { name: 'Tbl1::_id', type: 'ReadCapacityUnits' },
-            { name: 'Tbl2', type: 'ReadCapacityUnits' },
-            { name: 'Tbl2::_id', type: 'WriteCapacityUnits' },
-         ];
+         builder.isExcludedResource = function(resource) {
+            return resource.name === 'Tbl1' || resource.name === 'Tbl2::_id';
+         };
 
          expect(runner._removeExcludedResources(resources))
             .to
-            .eql(_.without(resources, tbl1W, tbl1idW, tbl2W, tbl2idW, tbl1R, tbl1idR, tbl2R));
+            .eql(_.without(resources, tbl1W, tbl1idW, tbl2W, tbl2idW, tbl1R, tbl2idR));
       });
 
    });

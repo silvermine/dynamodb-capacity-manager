@@ -31,6 +31,24 @@ module.exports = Class.extend({
       this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName, indexName), type: capacityType });
    },
 
+   isExcludedResource: function(resource) {
+      return !!_.find(this._excludedResources, function(exc) {
+         var isCorrectResource = (exc.name === resource.name);
+
+         if (!isCorrectResource) {
+            return false;
+         }
+
+         if (exc.type) {
+            return resource.capacityType === exc.type;
+         }
+
+         // this is the correct resource, and no exclusion type was specified, so the
+         // user wants the resource entirely excluded, not just one type
+         return true;
+      });
+   },
+
    handleReads: function() {
       this._handleReads = true;
       return this;
