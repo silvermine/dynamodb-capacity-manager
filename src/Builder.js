@@ -2,6 +2,7 @@
 
 var _ = require('underscore'),
     Class = require('class.extend'),
+    minimatch = require('minimatch'),
     Runner = require('./Runner'),
     constants = require('./constants'),
     resourceUtils = require('./util/resource');
@@ -24,23 +25,33 @@ module.exports = Class.extend({
    },
 
    excludeTable: function(tableName, capacityType) {
-      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName), type: capacityType });
+      this._excludedResources.push({
+         resourceType: 'table',
+         name: resourceUtils.makeResourceName(tableName),
+         capacityType: capacityType,
+      });
    },
 
    excludeIndex: function(tableName, indexName, capacityType) {
-      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName, indexName), type: capacityType });
+      this._excludedResources.push({
+         resourceType: 'index',
+         name: resourceUtils.makeResourceName(tableName, indexName),
+         capacityType: capacityType,
+      });
    },
 
    isExcludedResource: function(resource) {
       return !!_.find(this._excludedResources, function(exc) {
-         var isCorrectResource = (exc.name === resource.name);
+         var resourceTypeMatches = resource.resourceType === exc.resourceType,
+             nameMatches = minimatch(resource.name, exc.name),
+             isCorrectResource = resourceTypeMatches && nameMatches;
 
          if (!isCorrectResource) {
             return false;
          }
 
-         if (exc.type) {
-            return resource.capacityType === exc.type;
+         if (exc.capacityType) {
+            return resource.capacityType === exc.capacityType;
          }
 
          // this is the correct resource, and no exclusion type was specified, so the
