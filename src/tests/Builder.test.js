@@ -357,6 +357,10 @@ describe('Builder', function() {
       });
 
       describe('resource specific config', function() {
+         var expectedWildcardOnlyConfig = _.extend({}, defaultConfig);
+
+         expectedWildcardOnlyConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+         expectedWildcardOnlyConfig.MinutesOfStatsToIgnore = wildcardResourceConfig.MinutesOfStatsToIgnore;
 
          it('allows config to be added in a chain', function() {
             expect(builder.ruleConfigForTable(tbl1R.tableName, tbl1R.capacityType, {})).to.be(builder);
@@ -385,6 +389,229 @@ describe('Builder', function() {
             expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
          });
 
+         it('applies config for matches to suffix wildcard - tables', function() {
+            builder.ruleConfigForTable('Tbl*', constants.READ, wildcardResourceConfig);
+            builder.ruleConfigForTable('OtherTbl*', constants.WRITE, specificResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+         });
+
+         it('applies config for matches to suffix wildcard - indexes', function() {
+            builder.ruleConfigForIndex(tbl1idR.tableName, '_*', constants.READ, wildcardResourceConfig);
+            builder.ruleConfigForIndex(tbl1idR.tableName, 'OtherIndex', constants.READ, specificResourceConfig);
+            builder.ruleConfigForIndex('*', '_*', constants.WRITE, wildcardResourceConfig);
+            builder.ruleConfigForIndex('OtherTbl', '*', constants.WRITE, specificResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(expectedWildcardOnlyConfig);
+         });
+
+         it('applies config for matches to prefix wildcard - tables', function() {
+            builder.ruleConfigForTable('*2', constants.WRITE, wildcardResourceConfig);
+            builder.ruleConfigForTable('*OtherTable', constants.WRITE, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+         });
+
+         it('applies config for matches to prefix wildcard - indexes', function() {
+            builder.ruleConfigForIndex(tbl1idR.tableName, '*d', constants.READ, expectedWildcardOnlyConfig);
+            builder.ruleConfigForIndex('*', '*d', constants.WRITE, expectedWildcardOnlyConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(expectedWildcardOnlyConfig);
+         });
+
+         it('applies config for matches to multiple wildcards - tables', function() {
+            builder.ruleConfigForTable('T*l*', constants.READ, wildcardResourceConfig);
+            builder.ruleConfigForTable('*Table*', constants.WRITE, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+         });
+
+         it('applies config for matches to multiple wildcards - indexes', function() {
+            builder.ruleConfigForIndex(tbl1idR.tableName, '*i*', constants.READ, expectedWildcardOnlyConfig);
+            builder.ruleConfigForTable('*', 'OtherIndex', constants.READ, wildcardResourceConfig);
+            builder.ruleConfigForIndex('*', '*i*', constants.WRITE, expectedWildcardOnlyConfig);
+            builder.ruleConfigForTable('OtherTable', '*', constants.WRITE, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1NameR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(expectedWildcardOnlyConfig);
+         });
+
+         it('applies config for matches to wildcards in order config was applied - tables', function() {
+            var expectedWildcardMultiMatchConfig = _.extend({}, defaultConfig);
+
+            expectedWildcardMultiMatchConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+            expectedWildcardMultiMatchConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
+
+            builder.ruleConfigForTable('Tbl*', constants.READ, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+
+            builder.ruleConfigForTable('*2', constants.READ, specificResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(expectedWildcardMultiMatchConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+
+            // NOTE: This also tests that the same object will override the previous config
+            builder.ruleConfigForTable('*', constants.READ, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+         });
+
+         it('applies config for matches to wildcards in order config was applied - indexes', function() {
+            var expectedWildcardMultiMatchConfig = _.extend({}, defaultConfig),
+                expectedSpecificOverrideConfig = _.extend({}, defaultConfig, specificResourceConfig);
+
+            expectedWildcardMultiMatchConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+            expectedWildcardMultiMatchConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
+
+            builder.ruleConfigForIndex(tbl1idR.tableName, '*', constants.READ, expectedWildcardOnlyConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+
+            builder.ruleConfigForIndex('*', '_*', constants.READ, specificResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardMultiMatchConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(expectedSpecificOverrideConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+
+            // NOTE: This also tests that the same object will override the previous config
+            builder.ruleConfigForIndex('*', '*', constants.READ, expectedWildcardOnlyConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl2idR)).to.eql(expectedWildcardOnlyConfig);
+            expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
+         });
+
+         it('prefers specific config over wildcard - tables', function() {
+            var expectedSpecificConfig = _.extend({}, defaultConfig);
+
+            expectedSpecificConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+            expectedSpecificConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
+
+            builder.ruleConfigForTable('Tbl*', tbl1R.capacityType, wildcardResourceConfig);
+            builder.ruleConfigForTable(tbl1R.tableName, tbl1R.capacityType, specificResourceConfig);
+            builder.ruleConfigForTable(tbl1W.tableName, tbl1W.capacityType, specificResourceConfig);
+            builder.ruleConfigForTable('Tbl*', tbl1W.capacityType, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(expectedSpecificConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(expectedSpecificConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(defaultConfig);
+         });
+
+         it('prefers specific config over wildcard - indexes - wildcard in index name', function() {
+            var expectedSpecificConfig = _.extend({}, defaultConfig);
+
+            expectedSpecificConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+            expectedSpecificConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
+
+            builder.ruleConfigForIndex(tbl1idR.tableName, '*', tbl1idR.capacityType, wildcardResourceConfig);
+            builder.ruleConfigForIndex(tbl1idR.tableName, tbl1idR.indexName, tbl1idR.capacityType, specificResourceConfig);
+            builder.ruleConfigForIndex(tbl1idW.tableName, tbl1idW.indexName, tbl1idW.capacityType, specificResourceConfig);
+            builder.ruleConfigForIndex(tbl1idW.tableName, '*', tbl1idW.capacityType, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedSpecificConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedSpecificConfig);
+         });
+
+         it('prefers specific config over wildcard - indexes - wildcard in table name', function() {
+            var expectedSpecificConfig = _.extend({}, defaultConfig);
+
+            expectedSpecificConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
+            expectedSpecificConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
+
+            builder.ruleConfigForIndex('*', '_id', tbl1idR.capacityType, wildcardResourceConfig);
+            builder.ruleConfigForIndex(tbl1idR.tableName, tbl1idR.indexName, tbl1idR.capacityType, specificResourceConfig);
+            builder.ruleConfigForIndex(tbl1idW.tableName, tbl1idW.indexName, tbl1idW.capacityType, specificResourceConfig);
+            builder.ruleConfigForIndex('*', '_id', tbl1idW.capacityType, wildcardResourceConfig);
+
+            expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1W)).to.eql(defaultConfig);
+            expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedSpecificConfig);
+            expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedSpecificConfig);
+         });
+
       });
 
       it('allows all config levels play nice together', function() {
@@ -392,11 +619,12 @@ describe('Builder', function() {
 
          expectedConfig.AbsoluteMinimumProvisioned = customUserConfig.AbsoluteMinimumProvisioned;
          expectedConfig.AbsoluteMaximumProvisioned = customUserConfigForType.AbsoluteMaximumProvisioned;
-         expectedConfig.MinutesOfStatsToRetrieve = customUserConfigForType.MinutesOfStatsToRetrieve;
+         expectedConfig.MinutesOfStatsToRetrieve = wildcardResourceConfig.MinutesOfStatsToRetrieve;
          expectedConfig.MinutesOfStatsToIgnore = specificResourceConfig.MinutesOfStatsToIgnore;
 
          builder.defaultRuleConfig(customUserConfig);
          builder.defaultRuleConfig(constants.READ, customUserConfigForType);
+         builder.ruleConfigForTable(tbl1R.tableName + '*', tbl1R.capacityType, wildcardResourceConfig);
          builder.ruleConfigForTable(tbl1R.tableName, tbl1R.capacityType, specificResourceConfig);
 
          expect(builder.getConfigForResource(tbl1R)).to.eql(expectedConfig);
