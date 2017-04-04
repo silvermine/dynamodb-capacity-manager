@@ -24,12 +24,16 @@ module.exports = Class.extend({
       return this;
    },
 
-   excludeTable: function(tableName, capacityType) {
+   excludeTable: function(tableName, capacityType, alsoExcludeIndexes) {
       this._excludedResources.push({
          resourceType: 'table',
          name: resourceUtils.makeResourceName(tableName),
          capacityType: capacityType,
       });
+
+      if (alsoExcludeIndexes) {
+         this.excludeIndex(tableName, '*', capacityType);
+      }
    },
 
    excludeIndex: function(tableName, indexName, capacityType) {

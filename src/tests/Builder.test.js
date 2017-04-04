@@ -260,6 +260,52 @@ describe('Builder', function() {
          expect(builder.isExcludedResource(tbl2idW)).to.be(true);
       });
 
+      it('excludes indexes along with table, as requested, when matched by name', function() {
+         builder.excludeTable('Tbl1', undefined, true);
+         expect(builder.isExcludedResource(tbl1R)).to.be(true);
+         expect(builder.isExcludedResource(tbl1W)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idR)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idW)).to.be(true);
+         expect(builder.isExcludedResource(tbl2R)).to.be(false);
+         expect(builder.isExcludedResource(tbl2W)).to.be(false);
+         expect(builder.isExcludedResource(tbl2idR)).to.be(false);
+         expect(builder.isExcludedResource(tbl2idW)).to.be(false);
+      });
+
+      it('excludes indexes along with table, as requested, when matched by a wildcard', function() {
+         builder.excludeTable('Tbl*', undefined, true);
+         expect(builder.isExcludedResource(tbl1R)).to.be(true);
+         expect(builder.isExcludedResource(tbl1W)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idR)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idW)).to.be(true);
+         expect(builder.isExcludedResource(tbl2R)).to.be(true);
+         expect(builder.isExcludedResource(tbl2W)).to.be(true);
+         expect(builder.isExcludedResource(tbl2idR)).to.be(true);
+         expect(builder.isExcludedResource(tbl2idW)).to.be(true);
+      });
+
+      it('excludes indexes along with table, as requested, when matched by name and capacity type', function() {
+         builder.excludeTable('Tbl1', constants.READ, true);
+         expect(builder.isExcludedResource(tbl1R)).to.be(true);
+         expect(builder.isExcludedResource(tbl1W)).to.be(false);
+         expect(builder.isExcludedResource(tbl1idR)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idW)).to.be(false);
+         expect(builder.isExcludedResource(tbl2R)).to.be(false);
+         expect(builder.isExcludedResource(tbl2W)).to.be(false);
+         expect(builder.isExcludedResource(tbl2idR)).to.be(false);
+         expect(builder.isExcludedResource(tbl2idW)).to.be(false);
+
+         builder.excludeTable('Tbl*', constants.WRITE, true);
+         expect(builder.isExcludedResource(tbl1R)).to.be(true); // excluded by previous builder call
+         expect(builder.isExcludedResource(tbl1W)).to.be(true);
+         expect(builder.isExcludedResource(tbl1idR)).to.be(true); // excluded by previous builder call
+         expect(builder.isExcludedResource(tbl1idW)).to.be(true);
+         expect(builder.isExcludedResource(tbl2R)).to.be(false);
+         expect(builder.isExcludedResource(tbl2W)).to.be(true);
+         expect(builder.isExcludedResource(tbl2idR)).to.be(false);
+         expect(builder.isExcludedResource(tbl2idW)).to.be(true);
+      });
+
    });
 
    describe('rule configuration', function() {
