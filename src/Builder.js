@@ -3,7 +3,8 @@
 var _ = require('underscore'),
     Class = require('class.extend'),
     Runner = require('./Runner'),
-    DCM = require('./index');
+    constants = require('./constants'),
+    resourceUtils = require('./util/resource');
 
 module.exports = Class.extend({
 
@@ -23,11 +24,11 @@ module.exports = Class.extend({
    },
 
    excludeTable: function(tableName, capacityType) {
-      this._excludedResources.push({ name: DCM.makeResourceName(tableName), type: capacityType });
+      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName), type: capacityType });
    },
 
    excludeIndex: function(tableName, indexName, capacityType) {
-      this._excludedResources.push({ name: DCM.makeResourceName(tableName, indexName), type: capacityType });
+      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName, indexName), type: capacityType });
    },
 
    handleReads: function() {
@@ -71,7 +72,7 @@ module.exports = Class.extend({
    },
 
    _saveRuleConfigForResource: function(tableName, indexName, type, config) {
-      var resourceName = DCM.makeResourceName(tableName, indexName);
+      var resourceName = resourceUtils.makeResourceName(tableName, indexName);
 
       if (!this._perResourceConfigs[resourceName]) {
          this._perResourceConfigs[resourceName] = {};
@@ -86,7 +87,7 @@ module.exports = Class.extend({
           defaultForType = this._userDefaultConfigByType[resource.capacityType],
           forResourceType = perResource ? perResource[resource.capacityType] : {};
 
-      return _.extend({}, DCM.DEFAULT_RESOURCE_CONFIG, this._userDefaultConfig, defaultForType, forResourceType);
+      return _.extend({}, constants.DEFAULT_RESOURCE_CONFIG, this._userDefaultConfig, defaultForType, forResourceType);
    },
 
    build: function() {
