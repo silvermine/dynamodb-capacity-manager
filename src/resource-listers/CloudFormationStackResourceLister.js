@@ -4,7 +4,8 @@ var _ = require('underscore'),
     Q = require('q'),
     Class = require('class.extend'),
     AWS = require('aws-sdk'),
-    DCM = require('../index'),
+    constants = require('../constants'),
+    resourceUtils = require('../util/resource'),
     cfn = new AWS.CloudFormation(),
     dynamo = new AWS.DynamoDB();
 
@@ -44,12 +45,12 @@ module.exports = Class.extend({
          .then(function(resp) {
             var resources = [];
 
-            resources.push(this.convertTableToResource(resp.Table, DCM.READ));
-            resources.push(this.convertTableToResource(resp.Table, DCM.WRITE));
+            resources.push(this.convertTableToResource(resp.Table, constants.READ));
+            resources.push(this.convertTableToResource(resp.Table, constants.WRITE));
 
             _.each(resp.Table.GlobalSecondaryIndexes, function(index) {
-               resources.push(this.convertIndexToResource(resp.Table.TableName, index, DCM.READ));
-               resources.push(this.convertIndexToResource(resp.Table.TableName, index, DCM.WRITE));
+               resources.push(this.convertIndexToResource(resp.Table.TableName, index, constants.READ));
+               resources.push(this.convertIndexToResource(resp.Table.TableName, index, constants.WRITE));
             }.bind(this));
 
             return resources;
@@ -59,7 +60,7 @@ module.exports = Class.extend({
    convertTableToResource: function(table, capacityType) {
       return {
          resourceType: 'table',
-         name: DCM.makeResourceName(table.TableName),
+         name: resourceUtils.makeResourceName(table.TableName),
          tableName: table.TableName,
          capacityType: capacityType,
          provisioning: {
@@ -74,7 +75,7 @@ module.exports = Class.extend({
    convertIndexToResource: function(tableName, index, capacityType) {
       return {
          resourceType: 'index',
-         name: DCM.makeResourceName(tableName, index.IndexName),
+         name: resourceUtils.makeResourceName(tableName, index.IndexName),
          tableName: tableName,
          indexName: index.IndexName,
          capacityType: capacityType,
