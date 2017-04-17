@@ -172,14 +172,9 @@ for configuration and usage will be improved. Pull requests welcome!
 
 ## How do I contribute?
 
-Easy! Pull requests are welcome! Just do the following:
-
-   * Clone the code
-   * Install the dependencies with `npm install`
-   * Create a feature branch (e.g. `git checkout -b my_new_feature`)
-   * Make your changes and commit them with a reasonable commit message
-   * Make sure the code passes our standards with `grunt standards`
-   * Make sure all unit tests pass with `npm test`
+We genuinely appreciate external contributions. See [our extensive
+documentation](https://github.com/silvermine/silvermine-info#contributing) on
+how to contribute.
 
 NOTE: in the 0.9.0 release, there are a lot of places still missing automated testing,
 but these will be getting fixed in subsequent releases. Our goal is 100% unit test
