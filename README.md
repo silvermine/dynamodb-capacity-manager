@@ -63,6 +63,14 @@ builder.findResourcesWith(new DCM.CloudFormationStackResourceLister('your-stack-
 builder.excludeTable('SomeTable');
 builder.excludeIndex('SomeTable', 'IndexName');
 
+// It is also possible to exclude a table and all its indexes at once using:
+builder.excludeTable('AnotherTable', null, true);
+
+// Tables and indexes can be excluded with wildcards
+builder.excludeTable('PRD-*');
+builder.excludeIndex('SomeTable', '*-Subset');
+builder.excludeIndex('*', 'AnotherIndex');   // Excludes a index by this name on any tables it is present for
+
 // Tell it whether it should handle reads, writes, or both.
 // NOTE: the default is not to handle anything, so you must
 // call one of these functions.
@@ -115,6 +123,19 @@ builder.ruleConfigForIndex('MyMuchBusierThanAverageTable', 'SomeIndex', DCM.READ
 
 builder.ruleConfigForIndex('MyMuchBusierThanAverageTable', 'SomeIndex', DCM.WRITE, {
    AbsoluteMaximumProvisioned: 100,
+});
+
+// Wildcards are supported for matching table and index names. Rules matched
+// using a wildcard have greater precedence than the default user rule config,
+// but less precedence than rules applied to a specific table or index.
+builder.ruleConfigForTable('dev-*', DCM.WRITE, {
+   AbsoluteMinimumProvisioned: 1,
+   AbsoluteMaximumProvisioned: 10,
+});
+
+builder.ruleConfigForIndex('dev-*', '*', DCM.WRITE, {
+   AbsoluteMinimumProvisioned: 1,
+   AbsoluteMaximumProvisioned: 10,
 });
 
 // now that you have all your configuration in the DCM builder, go ahead
