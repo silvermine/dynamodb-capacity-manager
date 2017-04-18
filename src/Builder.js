@@ -2,6 +2,7 @@
 
 var _ = require('underscore'),
     Class = require('class.extend'),
+    minimatch = require('minimatch'),
     Runner = require('./Runner'),
     constants = require('./constants'),
     resourceUtils = require('./util/resource');
@@ -15,7 +16,7 @@ module.exports = Class.extend({
       this._handleWrites = false;
       this._userDefaultConfig = {};
       this._userDefaultConfigByType = {};
-      this._perResourceConfigs = {};
+      this._resourceConfigs = [];
    },
 
    findResourcesWith: function(resourceLister) {
@@ -23,12 +24,44 @@ module.exports = Class.extend({
       return this;
    },
 
-   excludeTable: function(tableName, capacityType) {
-      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName), type: capacityType });
+   excludeTable: function(tableName, capacityType, alsoExcludeIndexes) {
+      this._excludedResources.push({
+         resourceType: 'table',
+         name: resourceUtils.makeResourceName(tableName),
+         capacityType: capacityType,
+      });
+
+      if (alsoExcludeIndexes) {
+         this.excludeIndex(tableName, '*', capacityType);
+      }
    },
 
    excludeIndex: function(tableName, indexName, capacityType) {
-      this._excludedResources.push({ name: resourceUtils.makeResourceName(tableName, indexName), type: capacityType });
+      this._excludedResources.push({
+         resourceType: 'index',
+         name: resourceUtils.makeResourceName(tableName, indexName),
+         capacityType: capacityType,
+      });
+   },
+
+   isExcludedResource: function(resource) {
+      return !!_.find(this._excludedResources, function(exc) {
+         var resourceTypeMatches = resource.resourceType === exc.resourceType,
+             nameMatches = minimatch(resource.name, exc.name),
+             isCorrectResource = resourceTypeMatches && nameMatches;
+
+         if (!isCorrectResource) {
+            return false;
+         }
+
+         if (exc.capacityType) {
+            return resource.capacityType === exc.capacityType;
+         }
+
+         // this is the correct resource, and no exclusion type was specified, so the
+         // user wants the resource entirely excluded, not just one type
+         return true;
+      });
    },
 
    handleReads: function() {
@@ -64,30 +97,62 @@ module.exports = Class.extend({
    },
 
    ruleConfigForTable: function(tableName, type, config) {
-      return this._saveRuleConfigForResource(tableName, undefined, type, config);
+      return this._saveRuleConfigForResource(tableName, undefined, 'table', type, config);
    },
 
    ruleConfigForIndex: function(tableName, indexName, type, config) {
-      return this._saveRuleConfigForResource(tableName, indexName, type, config);
+      return this._saveRuleConfigForResource(tableName, indexName, 'index', type, config);
    },
 
-   _saveRuleConfigForResource: function(tableName, indexName, type, config) {
+   _saveRuleConfigForResource: function(tableName, indexName, resourceType, capacityType, config) {
       var resourceName = resourceUtils.makeResourceName(tableName, indexName);
 
-      if (!this._perResourceConfigs[resourceName]) {
-         this._perResourceConfigs[resourceName] = {};
-      }
+      this._resourceConfigs.push({
+         name: resourceName,
+         resourceType: resourceType,
+         capacityType: capacityType,
+         config: _.extend({}, config),
+      });
 
-      this._perResourceConfigs[resourceName][type] = config;
       return this;
    },
 
-   getConfigForResource: function(resource) {
-      var perResource = this._perResourceConfigs[resource.name],
-          defaultForType = this._userDefaultConfigByType[resource.capacityType],
-          forResourceType = perResource ? perResource[resource.capacityType] : {};
+   _allRuleConfigsForResource: function(resource) {
+      var groupedConfigs;
 
-      return _.extend({}, constants.DEFAULT_RESOURCE_CONFIG, this._userDefaultConfig, defaultForType, forResourceType);
+      groupedConfigs = _.chain(this._resourceConfigs)
+         .filter(function(config) {
+            return (resource.capacityType === config.capacityType
+               && resource.resourceType === config.resourceType
+               && minimatch(resource.name, config.name));
+         })
+         .groupBy(function(config) {
+            return config.name.indexOf('*') === -1 ? 'specific' : 'wildcard';
+         })
+         .value();
+
+      return _.pluck(_.union(groupedConfigs.wildcard, groupedConfigs.specific), 'config');
+   },
+
+   _mergeResourceConfigs: function(configs) {
+      // This is the equivalent of _.extend({}, configs[0], configs[1], ...)
+      return _.extend.apply(_, _.flatten([ {}, configs ], true));
+   },
+
+   getConfigForResource: function(resource) {
+      var allConfigs;
+
+      allConfigs = _.flatten(
+         [
+            constants.DEFAULT_RESOURCE_CONFIG,
+            this._userDefaultConfig,
+            this._userDefaultConfigByType[resource.capacityType],
+            this._allRuleConfigsForResource(resource),
+         ],
+         true
+      );
+
+      return this._mergeResourceConfigs(allConfigs);
    },
 
    build: function() {

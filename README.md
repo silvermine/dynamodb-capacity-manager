@@ -63,6 +63,14 @@ builder.findResourcesWith(new DCM.CloudFormationStackResourceLister('your-stack-
 builder.excludeTable('SomeTable');
 builder.excludeIndex('SomeTable', 'IndexName');
 
+// It is also possible to exclude a table and all its indexes at once using:
+builder.excludeTable('AnotherTable', null, true);
+
+// Tables and indexes can be excluded with wildcards
+builder.excludeTable('PRD-*');
+builder.excludeIndex('SomeTable', '*-Subset');
+builder.excludeIndex('*', 'AnotherIndex');   // Excludes a index by this name on any tables it is present for
+
 // Tell it whether it should handle reads, writes, or both.
 // NOTE: the default is not to handle anything, so you must
 // call one of these functions.
@@ -115,6 +123,19 @@ builder.ruleConfigForIndex('MyMuchBusierThanAverageTable', 'SomeIndex', DCM.READ
 
 builder.ruleConfigForIndex('MyMuchBusierThanAverageTable', 'SomeIndex', DCM.WRITE, {
    AbsoluteMaximumProvisioned: 100,
+});
+
+// Wildcards are supported for matching table and index names. Rules matched
+// using a wildcard have greater precedence than the default user rule config,
+// but less precedence than rules applied to a specific table or index.
+builder.ruleConfigForTable('dev-*', DCM.WRITE, {
+   AbsoluteMinimumProvisioned: 1,
+   AbsoluteMaximumProvisioned: 10,
+});
+
+builder.ruleConfigForIndex('dev-*', '*', DCM.WRITE, {
+   AbsoluteMinimumProvisioned: 1,
+   AbsoluteMaximumProvisioned: 10,
 });
 
 // now that you have all your configuration in the DCM builder, go ahead
@@ -172,14 +193,9 @@ for configuration and usage will be improved. Pull requests welcome!
 
 ## How do I contribute?
 
-Easy! Pull requests are welcome! Just do the following:
-
-   * Clone the code
-   * Install the dependencies with `npm install`
-   * Create a feature branch (e.g. `git checkout -b my_new_feature`)
-   * Make your changes and commit them with a reasonable commit message
-   * Make sure the code passes our standards with `grunt standards`
-   * Make sure all unit tests pass with `npm test`
+We genuinely appreciate external contributions. See [our extensive
+documentation](https://github.com/silvermine/silvermine-info#contributing) on
+how to contribute.
 
 NOTE: in the 0.9.0 release, there are a lot of places still missing automated testing,
 but these will be getting fixed in subsequent releases. Our goal is 100% unit test
