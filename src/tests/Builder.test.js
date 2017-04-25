@@ -2,8 +2,9 @@
 
 var _ = require('underscore'),
     expect = require('expect.js'),
+    rewire = require('rewire'),
     constants = require('../constants'),
-    Builder = require('../Builder');
+    Builder = rewire('../Builder');
 
 describe('Builder', function() {
 
@@ -18,7 +19,7 @@ describe('Builder', function() {
        tbl2idR = { resourceType: 'index', name: 'Tbl2::_id', tableName: 'Tbl2', indexName: '_id', capacityType: 'ReadCapacityUnits' },
        tbl2idW = { resourceType: 'index', name: 'Tbl2::_id', tableName: 'Tbl2', indexName: '_id', capacityType: 'WriteCapacityUnits' },
        customUserConfig, customUserConfigForType, wildcardResourceConfig, specificResourceConfig,
-       builder;
+       RunnerMock, builder, revert;
 
    customUserConfig = {
       AbsoluteMinimumProvisioned: 9999,
@@ -54,7 +55,34 @@ describe('Builder', function() {
    expect(specificResourceConfig.MinutesOfStatsToIgnore).to.not.eql(defaultConfig.MinutesOfStatsToIgnore);
 
    beforeEach(function() {
+      RunnerMock = function() {};
+
+      revert = Builder.__set__({
+         Runner: RunnerMock,
+      });
+
       builder = new Builder();
+   });
+
+   afterEach(function() {
+      revert();
+   });
+
+   describe('findResourcesWith', function() {
+
+      it('permits chaining', function() {
+         expect(builder.findResourcesWith({})).to.be(builder);
+      });
+
+      it('stores provided resource lister', function() {
+         var resourceLister = {};
+
+         expect(builder._resourceLister).to.be(null);
+
+         builder.findResourcesWith(resourceLister);
+         expect(builder._resourceLister).to.be(resourceLister);
+      });
+
    });
 
    describe('resource exclusion', function() {
@@ -308,6 +336,66 @@ describe('Builder', function() {
 
    });
 
+   describe('handleReads', function() {
+
+      it('permits chaining', function() {
+         expect(builder.handleReads()).to.be(builder);
+      });
+
+      it('enables read handling', function() {
+         expect(builder._handleReads).to.be(false);
+
+         builder.handleReads();
+         expect(builder._handleReads).to.be(true);
+
+         // Is idempotent
+         builder.handleReads();
+         expect(builder._handleReads).to.be(true);
+      });
+
+   });
+
+   describe('handleWrites', function() {
+
+      it('permits chaining', function() {
+         expect(builder.handleWrites()).to.be(builder);
+      });
+
+      it('enables write handling', function() {
+         expect(builder._handleWrites).to.be(false);
+
+         builder.handleWrites();
+         expect(builder._handleWrites).to.be(true);
+
+         // Is idempotent
+         builder.handleWrites();
+         expect(builder._handleWrites).to.be(true);
+      });
+
+   });
+
+   describe('handleReadsAndWrites', function() {
+
+      it('permits chaining', function() {
+         expect(builder.handleReadsAndWrites()).to.be(builder);
+      });
+
+      it('enables read and write handling', function() {
+         expect(builder._handleReads).to.be(false);
+         expect(builder._handleWrites).to.be(false);
+
+         builder.handleReadsAndWrites();
+         expect(builder._handleReads).to.be(true);
+         expect(builder._handleWrites).to.be(true);
+
+         // Is idempotent
+         builder.handleReadsAndWrites();
+         expect(builder._handleReads).to.be(true);
+         expect(builder._handleWrites).to.be(true);
+      });
+
+   });
+
    describe('rule configuration', function() {
 
       it('allows config to be added in a chain', function() {
@@ -352,6 +440,54 @@ describe('Builder', function() {
             expect(builder.getConfigForResource(tbl1W)).to.eql(expectedWriteConfig);
             expect(builder.getConfigForResource(tbl1idR)).to.eql(expectedReadConfig);
             expect(builder.getConfigForResource(tbl1idW)).to.eql(expectedWriteConfig);
+         });
+
+         it('errors when fn(object) form is not followed', function() {
+            var testFn;
+
+            testFn = function() {
+               builder.defaultRuleConfig();
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(constants.WRITE);
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(42);
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(undefined);
+            };
+            expect(testFn).to.throwError();
+         });
+
+         it('errors when fn(string, object) format is not followed', function() {
+            var testFn;
+
+            testFn = function() {
+               builder.defaultRuleConfig({}, constants.WRITE);
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(constants.WRITE, 42);
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(constants.READ, constants.WRITE);
+            };
+            expect(testFn).to.throwError();
+
+            testFn = function() {
+               builder.defaultRuleConfig(constants.WRITE, undefined);
+            };
+            expect(testFn).to.throwError();
          });
 
       });
@@ -628,6 +764,14 @@ describe('Builder', function() {
          builder.ruleConfigForTable(tbl1R.tableName, tbl1R.capacityType, specificResourceConfig);
 
          expect(builder.getConfigForResource(tbl1R)).to.eql(expectedConfig);
+      });
+
+   });
+
+   describe('build', function() {
+
+      it('returns an instance of Runner', function() {
+         expect(builder.build()).to.be.a(RunnerMock);
       });
 
    });
