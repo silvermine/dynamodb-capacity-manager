@@ -6,6 +6,7 @@ var _ = require('underscore'),
     moment = require('moment'),
     yaml = require('js-yaml'),
     Boss = require('../src/boss/DecisionMaker'),
+    constants = require('../src/constants'),
     HOURS_OF_DATA_FOR_BOSS = 1;
 
 module.exports = function(grunt) {
@@ -43,8 +44,8 @@ module.exports = function(grunt) {
       }
 
       return Q.all([ Q.ninvoke(fs, 'readFile', dataFile), getConfig ])
-         .spread(function(data, config) {
-            boss = new Boss(config);
+         .spread(function(data, userConfig) {
+            boss = new Boss(_.extend({}, constants.DEFAULT_RESOURCE_CONFIG, userConfig));
             return data;
          })
          .then(function(data) {
@@ -54,7 +55,7 @@ module.exports = function(grunt) {
 
                   return {
                      Timestamp: columns[0],
-                     Value: (columns[1] / 60),
+                     Value: columns[1],
                   };
                })
                .sortBy('Timestamp')
