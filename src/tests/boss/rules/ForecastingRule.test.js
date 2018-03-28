@@ -20,9 +20,9 @@ describe('ForecastingRule', function() {
 
    describe('apply', function() {
 
-      function runTest(forecastValue, expectedForecast) {
+      function runTest(forecastValue, expectedForecast, expectedIsAllowedToChange) {
          var rule = new Rule({ MinutesToForecast: 10 }),
-             state = { usage: 'usage-array' },
+             state = { usage: 'usage-array', isAllowedToChange: true },
              forecaster = { forecast: function() {} },
              mock = sinon.mock(forecaster);
 
@@ -33,6 +33,7 @@ describe('ForecastingRule', function() {
          rule.apply(state);
 
          expect(state.forecastUsage).to.eql(expectedForecast);
+         expect(state.isAllowedToChange).to.eql(expectedIsAllowedToChange === undefined ? true : expectedIsAllowedToChange);
          mock.verify();
       }
 
@@ -40,14 +41,19 @@ describe('ForecastingRule', function() {
          runTest(20, 20);
       });
 
-      it('does not allow zero, negative, or NaN values to be forecast', function() {
+      it('does not allow zero or negative values to be forecast', function() {
          runTest(0, 1);
          runTest(-1, 1);
-         runTest(NaN, 1);
-         runTest(null, 1);
          runTest(-1000, 1);
          runTest(-2.6, 1);
          runTest(0.00001, 1);
+      });
+
+      it('does not allow NaN or Infinity forecasts to adjust the forecast', function() {
+         runTest(NaN, undefined, false);
+         runTest(Infinity, undefined, false);
+         runTest(-Infinity, undefined, false);
+         runTest(null, undefined, false);
       });
 
    });
