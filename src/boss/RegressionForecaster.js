@@ -50,6 +50,6 @@ module.exports = Class.extend({
    },
 
    _regress: function(series) {
-      return regression(this._regressionType, series).points;
+      return regression[this._regressionType](series, { precision: 50 }).points;
    },
 });
