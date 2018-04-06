@@ -43,7 +43,7 @@ module.exports = Class.extend({
       _.each(_.range(1, additionalMinutes + 1), function() {
          var time = moment(lastTime).utc().add(1, 'minutes');
 
-         series.push([ time.toDate(), undefined ]);
+         series.push([ time.toDate(), null ]);
 
          lastTime = time;
       });
