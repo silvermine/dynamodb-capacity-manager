@@ -39,6 +39,36 @@ describe('RegressionForecastingRule', function() {
          expect(forecast).to.be.within(5, 9);
       });
 
+      it('forecasts N minutes ahead', function() {
+         var forecaster = new Forecaster(),
+             usage, forecast;
+
+         usage = [
+            { 'Timestamp': '1970-01-01T00:00:00.000Z', 'Value': 0 },
+            { 'Timestamp': '1970-01-01T00:01:00.000Z', 'Value': 60 },
+            { 'Timestamp': '1970-01-01T00:02:00.000Z', 'Value': 120 },
+            { 'Timestamp': '1970-01-01T00:03:00.000Z', 'Value': 180 },
+            { 'Timestamp': '1970-01-01T00:04:00.000Z', 'Value': 240 },
+         ];
+
+         forecast = forecaster.forecast(usage, 0);
+         expect(forecast).to.be.within(239, 241);
+
+         forecast = forecaster.forecast(usage, 5);
+         expect(forecast).to.be.within(539, 541);
+      });
+
+      it('handles an empty usage dataset', function() {
+         var forecaster = new Forecaster(),
+             forecast;
+
+         forecast = forecaster.forecast([], 0);
+         expect(forecast).to.be(undefined);
+
+         forecast = forecaster.forecast([], 5);
+         expect(forecast).to.be(undefined);
+      });
+
    });
 
 });
