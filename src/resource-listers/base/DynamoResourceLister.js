@@ -10,10 +10,6 @@ var _ = require('underscore'),
 
 module.exports = Class.extend({
 
-   init: function(stackName) {
-      this._stackName = stackName;
-   },
-
    listResources: function() {
       var self = this;
 
