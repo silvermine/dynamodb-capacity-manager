@@ -11,13 +11,20 @@ module.exports = Class.extend({
 
    getStatistic: function(metricName, resource, minutesBack, fillZeroes, minutesToIgnore) {
       var endTime = moment().utc(),
-          startTime, params;
+          startTime;
 
       // end at the first millisecond of the current minute (do not retrieve partial minute stats)
       endTime.seconds(0).milliseconds(0).subtract(minutesToIgnore, 'minutes');
 
       // start at the specified time
       startTime = endTime.clone().subtract(minutesBack, 'minutes');
+
+      return this.getStatisticForTimeslice(metricName, resource, startTime, endTime, fillZeroes);
+   },
+
+
+   getStatisticForTimeslice: function(metricName, resource, startTime, endTime, fillZeroes) {
+      var params;
 
       params = {
          Namespace: 'AWS/DynamoDB',

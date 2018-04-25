@@ -3,6 +3,24 @@
       <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
       <script type="text/javascript">
          function setData(data) {
+            var totalConsumed, totalProvisioned;
+
+            totalConsumed = data.slice(1).reduce(function(memo, row) {
+               return memo + parseFloat(row[1]);
+            }, 0);
+            totalProvisioned = data.slice(1).reduce(function(memo, row) {
+               return memo + parseFloat(row[2]);
+            }, 0);
+
+            document.addEventListener('DOMContentLoaded', function() {
+               function round(num) {
+                  return Math.round(num * 100) / 100;
+               }
+               document.getElementById('totalConsumed').innerHTML = round(totalConsumed);
+               document.getElementById('totalProvisioned').innerHTML = round(totalProvisioned);
+               document.getElementById('usageEfficiency').innerHTML = round(totalConsumed/totalProvisioned * 100) + '%';
+            }, false);
+
             google.charts.load('current', { packages: [ 'corechart', 'controls' ] });
             google.charts.setOnLoadCallback(drawChart);
 
@@ -68,12 +86,31 @@
          }
       </script>
       <script type="text/javascript" src="./data.js"></script>
+      <style>
+         body {
+            font-family: sans-serif;
+         }
+         #summary {
+            width: 300px;
+            margin: 2em auto 0 auto;
+         }
+         #summary span {
+            font-weight: bold;
+         }
+      </style>
    </head>
 
    <body>
       <div id="dashboard">
          <div id="chart"></div>
          <div id="control"></div>
+      </div>
+      <div id="summary">
+         <ul>
+            <li>Total Consumed: <span id='totalConsumed'></span></li>
+            <li>Total Provisioned: <span id='totalProvisioned'></span></li>
+            <li>Efficiency: <span id='usageEfficiency'></span></li>
+         </ul>
       </div>
    </body>
 </html>
