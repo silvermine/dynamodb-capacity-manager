@@ -26,26 +26,26 @@ module.exports = Class.extend({
 
    _createRegressableTimeSeries: function(data) {
       return _.map(data, function(point) {
-         return [ moment(point.Timestamp).utc().toDate(), point.Value ];
+         return [ moment(point.Timestamp).utc().unix(), point.Value ];
       });
    },
 
    _addEmptySlotsToTimeSeries: function(series, additionalMinutes) {
       var lastPoint = _.last(series),
-          lastTime;
+          lastSeconds;
 
       if (!lastPoint) {
          return;
       }
 
-      lastTime = lastPoint[0];
+      lastSeconds = lastPoint[0];
 
       _.each(_.range(1, additionalMinutes + 1), function() {
-         var time = moment(lastTime).utc().add(1, 'minutes');
+         var seconds = lastSeconds + 60; // Add 1 minute
 
-         series.push([ time.toDate(), null ]);
+         series.push([ seconds, null ]);
 
-         lastTime = time;
+         lastSeconds = seconds;
       });
    },
 

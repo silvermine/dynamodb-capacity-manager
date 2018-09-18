@@ -1,6 +1,7 @@
 'use strict';
 
-var sinon = require('sinon'),
+var _ = require('underscore'),
+    sinon = require('sinon'),
     expect = require('expect.js'),
     rewire = require('rewire'),
     Forecaster = rewire('../../boss/RegressionForecaster');
@@ -28,16 +29,16 @@ describe('RegressionForecastingRule', function() {
          ];
 
          series = [
-            [ '2017-01-01T12:00:00.000Z', 12 ],
-            [ '2017-01-01T12:01:00.000Z', 7 ],
-            [ '2017-01-01T12:03:00.000Z', 31 ],
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
          ];
          createSeriesStub.returns(series);
 
          regressStub.returns([
-            [ new Date('2017-01-01T12:00:00.000Z'), 7.24 ],
-            [ new Date('2017-01-01T12:01:00.000Z'), 16.66 ],
-            [ new Date('2017-01-01T12:03:00.000Z'), 26.09 ],
+            [ 1483272000, 7.24 ],
+            [ 1483272060, 16.66 ],
+            [ 1483272180, 26.09 ],
          ]);
 
          result = forecaster.forecast(data, 2);
@@ -125,9 +126,9 @@ describe('RegressionForecastingRule', function() {
          ];
 
          expected = [
-            [ new Date('2017-01-01T12:00:00.000Z'), 12 ],
-            [ new Date('2017-01-01T12:01:00.000Z'), 7 ],
-            [ new Date('2017-01-01T12:03:00.000Z'), 31 ],
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
          ];
 
          series = forecaster._createRegressableTimeSeries(data);
@@ -144,9 +145,9 @@ describe('RegressionForecastingRule', function() {
 
       beforeEach(function() {
          series = [
-            [ new Date('2017-01-01T12:00:00.000Z'), 12 ],
-            [ new Date('2017-01-01T12:01:00.000Z'), 7 ],
-            [ new Date('2017-01-01T12:03:00.000Z'), 31 ],
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
          ];
       });
 
@@ -179,10 +180,10 @@ describe('RegressionForecastingRule', function() {
 
       it('can add one empty slot', function() {
          expected = [
-            [ new Date('2017-01-01T12:00:00.000Z'), 12 ],
-            [ new Date('2017-01-01T12:01:00.000Z'), 7 ],
-            [ new Date('2017-01-01T12:03:00.000Z'), 31 ],
-            [ new Date('2017-01-01T12:04:00.000Z'), null ],
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
+            [ 1483272240, null ],
          ];
 
          forecaster._addEmptySlotsToTimeSeries(series, 1);
@@ -195,13 +196,13 @@ describe('RegressionForecastingRule', function() {
 
       it('adds "n" number of empty slots', function() {
          expected = [
-            [ new Date('2017-01-01T12:00:00.000Z'), 12 ],
-            [ new Date('2017-01-01T12:01:00.000Z'), 7 ],
-            [ new Date('2017-01-01T12:03:00.000Z'), 31 ],
-            [ new Date('2017-01-01T12:04:00.000Z'), null ],
-            [ new Date('2017-01-01T12:05:00.000Z'), null ],
-            [ new Date('2017-01-01T12:06:00.000Z'), null ],
-            [ new Date('2017-01-01T12:07:00.000Z'), null ],
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
+            [ 1483272240, null ],
+            [ 1483272300, null ],
+            [ 1483272360, null ],
+            [ 1483272420, null ],
          ];
 
          forecaster._addEmptySlotsToTimeSeries(series, 4);
@@ -215,57 +216,93 @@ describe('RegressionForecastingRule', function() {
    });
 
    describe('_regress', function() {
-      var fakeRegressionLib, revert, series, result;
 
-      series = [
-         [ new Date('2017-01-01T12:00:00.000Z'), 12 ],
-         [ new Date('2017-01-01T12:01:00.000Z'), 7 ],
-         [ new Date('2017-01-01T12:03:00.000Z'), 31 ],
-      ];
+      describe('regression lib API compatibility', function() {
+         var fakeRegressionLib, revert, series, result;
 
-      result = [
-         [ new Date('2017-01-01T12:00:00.000Z'), 7.24 ],
-         [ new Date('2017-01-01T12:01:00.000Z'), 16.66 ],
-         [ new Date('2017-01-01T12:03:00.000Z'), 26.09 ],
-      ];
+         series = [
+            [ 1483272000, 12 ],
+            [ 1483272060, 7 ],
+            [ 1483272180, 31 ],
+         ];
 
-      beforeEach(function() {
-         fakeRegressionLib = {
-            linear: sinon.stub(),
-            polynomial: sinon.stub(),
-         };
+         result = [
+            [ 1483272000, 7.24 ],
+            [ 1483272060, 16.66 ],
+            [ 1483272180, 26.09 ],
+         ];
 
-         revert = Forecaster.__set__({
-            regression: fakeRegressionLib,
+         beforeEach(function() {
+            fakeRegressionLib = {
+               linear: sinon.stub(),
+               polynomial: sinon.stub(),
+            };
+
+            revert = Forecaster.__set__({
+               regression: fakeRegressionLib,
+            });
+
+            forecaster = new Forecaster();
          });
 
-         forecaster = new Forecaster();
+         afterEach(function() {
+            revert();
+         });
+
+         it('uses the default regression type when no type is specified', function() {
+            forecaster = new Forecaster();
+
+            fakeRegressionLib.polynomial.returns({ points: result });
+
+            expect(forecaster._regress(series)).to.be(result);
+
+            sinon.assert.calledOnce(fakeRegressionLib.polynomial);
+            sinon.assert.calledWithExactly(fakeRegressionLib.polynomial, series, { precision: 50 });
+         });
+
+         it('uses user provided regression type', function() {
+            forecaster = new Forecaster('linear');
+
+            fakeRegressionLib.linear.returns({ points: result });
+
+            expect(forecaster._regress(series)).to.be(result);
+
+            sinon.assert.calledOnce(fakeRegressionLib.linear);
+            sinon.assert.calledWithExactly(fakeRegressionLib.linear, series, { precision: 50 });
+         });
+
       });
 
-      afterEach(function() {
-         revert();
-      });
+      it('returns a number with this previously troublesome data set', function() {
+         var usage, forecast;
 
-      it('uses the default regression type when no type is specified', function() {
-         forecaster = new Forecaster();
+         usage = [
+            { 'Timestamp': '2018-03-16T12:56:00-04:00', 'Value': 8.741666666666667 },
+            { 'Timestamp': '2018-03-16T12:57:00-04:00', 'Value': 7.558333333333334 },
+            { 'Timestamp': '2018-03-16T12:58:00-04:00', 'Value': 8.383333333333333 },
+            { 'Timestamp': '2018-03-16T12:59:00-04:00', 'Value': 6.45 },
+            { 'Timestamp': '2018-03-16T13:00:00-04:00', 'Value': 7.95 },
+            { 'Timestamp': '2018-03-16T13:01:00-04:00', 'Value': 7.4 },
+            { 'Timestamp': '2018-03-16T13:02:00-04:00', 'Value': 5.583333333333333 },
+            { 'Timestamp': '2018-03-16T13:03:00-04:00', 'Value': 6.95 },
+            { 'Timestamp': '2018-03-16T13:04:00-04:00', 'Value': 6.083333333333333 },
+            { 'Timestamp': '2018-03-16T13:05:00-04:00', 'Value': 5.666666666666667 },
+            { 'Timestamp': '2018-03-16T13:06:00-04:00', 'Value': 6.791666666666667 },
+            { 'Timestamp': '2018-03-16T13:07:00-04:00', 'Value': 5.791666666666667 },
+            { 'Timestamp': '2018-03-16T13:08:00-04:00', 'Value': 6.983333333333333 },
+            { 'Timestamp': '2018-03-16T13:09:00-04:00', 'Value': 5.975 },
+            { 'Timestamp': '2018-03-16T13:10:00-04:00', 'Value': 7.133333333333334 },
+            { 'Timestamp': '2018-03-16T13:11:00-04:00', 'Value': 8.016666666666667 },
+            { 'Timestamp': '2018-03-16T13:12:00-04:00', 'Value': 7.133333333333334 },
+            { 'Timestamp': '2018-03-16T13:13:00-04:00', 'Value': 7.508333333333334 },
+            { 'Timestamp': '2018-03-16T13:14:00-04:00', 'Value': 6.758333333333334 },
+            { 'Timestamp': '2018-03-16T13:15:00-04:00', 'Value': 7.475 },
+         ];
 
-         fakeRegressionLib.polynomial.returns({ points: result });
-
-         expect(forecaster._regress(series)).to.be(result);
-
-         sinon.assert.calledOnce(fakeRegressionLib.polynomial);
-         sinon.assert.calledWithExactly(fakeRegressionLib.polynomial, series, { precision: 50 });
-      });
-
-      it('uses user provided regression type', function() {
-         forecaster = new Forecaster('linear');
-
-         fakeRegressionLib.linear.returns({ points: result });
-
-         expect(forecaster._regress(series)).to.be(result);
-
-         sinon.assert.calledOnce(fakeRegressionLib.linear);
-         sinon.assert.calledWithExactly(fakeRegressionLib.linear, series, { precision: 50 });
+         forecast = forecaster.forecast(usage, 5);
+         expect(forecast).to.be.a('number');
+         expect(_.isFinite(forecast)).to.be(true);
+         expect(forecast).to.be.within(5, 10);
       });
 
    });

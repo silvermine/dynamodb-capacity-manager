@@ -1,6 +1,7 @@
 'use strict';
 
-var Forecaster = require('../RegressionForecaster'),
+var _ = require('underscore'),
+    Forecaster = require('../RegressionForecaster'),
     BaseRule = require('./BaseRule');
 
 module.exports = BaseRule.extend({
@@ -16,7 +17,17 @@ module.exports = BaseRule.extend({
 
 
    apply: function(state) {
-      var forecast = this._forecaster.forecast(state.usage, this._config.MinutesToForecast) || 1;
+      var forecast = this._forecaster.forecast(state.usage, this._config.MinutesToForecast);
+
+      if (!_.isFinite(forecast)) {
+         console.log(
+            'ERROR: Not changing usage as forecaster did not create a valid forecast (predicted: %s) for the usage %s',
+            forecast,
+            JSON.stringify(state.usage)
+         );
+         state.isAllowedToChange = false;
+         return;
+      }
 
       state.forecastUsage = Math.max(forecast, 1);
    },
