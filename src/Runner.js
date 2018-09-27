@@ -159,7 +159,8 @@ module.exports = Class.extend({
          _.each(thisIndexChanges, applyChange.bind(null, gsiUpdateParams));
 
          if (executedChanges.length > numberOfChangesMade) {
-            // we made changes with this particular index, so we need to apply those to the table update params
+            // we made changes with this particular index, so we need to apply those to
+            // the table update params
             if (!params.GlobalSecondaryIndexUpdates) {
                params.GlobalSecondaryIndexUpdates = [];
             }
@@ -241,11 +242,12 @@ module.exports = Class.extend({
           boss = new Boss(resourceConfig),
           provisioning, usage, throttling, newCapacity;
 
-      // TODO: we should not need to map between the data format we're using here for provisioning and
-      // the data format the boss expects. This class is using our standard naming convention, which
-      // starts variables with a lower case number. The boss was using AWS' format, which has upper case
-      // letters. In a subsequent commit we need to refactor the boss, all rules, tests, etc, to use this
-      // standard and stop doing the mapping here.
+      // TODO: we should not need to map between the data format we're using here for
+      // provisioning and the data format the boss expects. This class is using our
+      // standard naming convention, which starts variables with a lower case number. The
+      // boss was using AWS' format, which has upper case letters. In a subsequent commit
+      // we need to refactor the boss, all rules, tests, etc, to use this standard and
+      // stop doing the mapping here.
       provisioning = {
          NumberOfDecreasesToday: resource.provisioning.numberOfDecreasesToday,
          LastIncreaseDateTime: resource.provisioning.lastIncrease,

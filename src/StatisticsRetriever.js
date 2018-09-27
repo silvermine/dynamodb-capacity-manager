@@ -13,7 +13,8 @@ module.exports = Class.extend({
       var endTime = moment().utc(),
           startTime;
 
-      // end at the first millisecond of the current minute (do not retrieve partial minute stats)
+      // end at the first millisecond of the current minute (do not retrieve partial
+      // minute stats)
       endTime.seconds(0).milliseconds(0).subtract(minutesToIgnore, 'minutes');
 
       // start at the specified time
