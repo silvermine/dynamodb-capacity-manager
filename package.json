@@ -31,16 +31,16 @@
     "underscore": "1.8.3"
   },
   "devDependencies": {
-    "aws-sdk": "2.5.4",
-    "coveralls": "2.11.12",
+    "aws-sdk": "2.354.0",
+    "coveralls": "3.0.2",
     "eslint": "3.3.1",
     "eslint-config-silvermine": "1.1.2",
     "expect.js": "0.3.1",
-    "grunt": "1.0.1",
+    "grunt": "1.0.3",
     "grunt-eslint": "19.0.0",
-    "istanbul": "0.4.4",
+    "istanbul": "0.4.5",
     "js-yaml": "3.8.4",
-    "mocha": "3.0.2",
+    "mocha": "5.2.0",
     "mocha-lcov-reporter": "1.2.0",
     "rewire": "2.5.2",
     "sinon": "1.17.5"
