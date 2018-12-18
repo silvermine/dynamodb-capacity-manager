@@ -115,8 +115,9 @@ describe('DecisionMaker', function() {
 
          sinon.assert.calledOnce(willChangeCapacitySpy);
 
-         // Not able to properly assert due to sinon keeping a reference to the passed args
-         // rather than cloning them: See: https://github.com/sinonjs/sinon/issues/665
+         // Not able to properly assert due to sinon keeping a reference to the passed
+         // args rather than cloning them: See:
+         // https://github.com/sinonjs/sinon/issues/665
          // sinon.assert.calledWith(willChangeCapacitySpy, {
          //    provisioning: provisioned,
          //    usage: usageData,
@@ -195,8 +196,9 @@ describe('DecisionMaker', function() {
 
          sinon.assert.calledOnce(willChangeCapacitySpy);
 
-         // Not able to properly assert due to sinon keeping a reference to the passed args
-         // rather than cloning them: See: https://github.com/sinonjs/sinon/issues/665
+         // Not able to properly assert due to sinon keeping a reference to the passed
+         // args rather than cloning them: See:
+         // https://github.com/sinonjs/sinon/issues/665
          // sinon.assert.calledWith(willChangeCapacitySpy, {
          //    provisioning: provisioned,
          //    usage: usageData,

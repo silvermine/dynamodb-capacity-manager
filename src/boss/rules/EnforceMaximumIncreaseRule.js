@@ -18,8 +18,9 @@ module.exports = BaseRule.extend({
             return;
          }
 
-         // we don't want to spend too much money by making sudden massive jumps, so we allow for
-         // tiered maximum jump amounts based on the currently-provisioned capacity
+         // we don't want to spend too much money by making sudden massive jumps, so we
+         // allow for tiered maximum jump amounts based on the currently-provisioned
+         // capacity
          range = this.getConfigRange(this._config.MaximumIncreaseAmount, state.provisioning.CapacityUnits);
 
          if (changePctg > range.Percentage) {

@@ -642,7 +642,8 @@ describe('Builder', function() {
             expect(builder.getConfigForResource(tbl2idR)).to.eql(defaultConfig);
             expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
 
-            // NOTE: This also tests that the same object will override the previous config
+            // NOTE: This also tests that the same object will override the previous
+            // config
             builder.ruleConfigForTable('*', constants.READ, wildcardResourceConfig);
 
             expect(builder.getConfigForResource(tbl1R)).to.eql(expectedWildcardOnlyConfig);
@@ -684,7 +685,8 @@ describe('Builder', function() {
             expect(builder.getConfigForResource(tbl2idR)).to.eql(expectedSpecificOverrideConfig);
             expect(builder.getConfigForResource(tbl2idW)).to.eql(defaultConfig);
 
-            // NOTE: This also tests that the same object will override the previous config
+            // NOTE: This also tests that the same object will override the previous
+            // config
             builder.ruleConfigForIndex('*', '*', constants.READ, expectedWildcardOnlyConfig);
 
             expect(builder.getConfigForResource(tbl1R)).to.eql(defaultConfig);

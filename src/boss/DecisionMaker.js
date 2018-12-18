@@ -80,7 +80,8 @@ module.exports = Class.extend({
     * @param {Object} provisioned - the table's current capacity, etc - see note above
     * @param {Array} usageData - the used capacity metrics - see note above
     * @param {Array} throttlingData - the used capacity metrics - see note above
-    * @param {Date} currentTime - leave this undefined unless you're running historical analysis
+    * @param {Date} currentTime - leave this undefined unless you're running historical
+    * analysis
     * @returns {Integer} the new capacity value for the table or index
     */
    getUpdatedCapacity: function(provisioned, usageData, throttlingData, currentTime) {

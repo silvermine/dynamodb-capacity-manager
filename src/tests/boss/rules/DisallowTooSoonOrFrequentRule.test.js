@@ -94,25 +94,28 @@ describe('DisallowTooSoonOrFrequent', function() {
          runTest(200, '2016-08-18T20:05:01.000Z', 4, undefined);
          runTest(200, '2016-08-18T20:05:01.000Z', 5, undefined);
 
-         // trending down, it has been over ten minutes since last decrease, not too many decreases
+         // trending down, it has been over ten minutes since last decrease, not too many
+         // decreases
          runTest(50, '2016-08-18T20:10:01.000Z', 0, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:10:01.000Z', 1, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:10:01.000Z', 2, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:10:01.000Z', 3, undefined, { decAfterInc: 1 });
 
-         // trending down, it has been over ten minutes since last decrease, not too many decreases (custom max dec count)
+         // trending down, it has been over ten minutes since last decrease, not too many
+         // decreases (custom max dec count)
          runTest(50, '2016-08-18T20:10:01.000Z', 0, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:10:01.000Z', 1, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:10:01.000Z', 2, undefined, { decAfterInc: 1, maxDecreases: 3 });
 
-         // trending down, it has been over ten minutes since last decrease, fifteen since last increase, not too many decreases
+         // trending down, it has been over ten minutes since last decrease, fifteen since
+         // last increase, not too many decreases
          runTest(50, '2016-08-18T20:15:01.000Z', 0, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:15:01.000Z', 1, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:15:01.000Z', 2, undefined, { decAfterInc: 1 });
          runTest(50, '2016-08-18T20:15:01.000Z', 3, undefined, { decAfterInc: 1 });
 
-         // trending down, it has been over ten minutes since last decrease, fifteen since last increase, not too many decreases
-         // custom max dec count
+         // trending down, it has been over ten minutes since last decrease, fifteen since
+         // last increase, not too many decreases custom max dec count
          runTest(50, '2016-08-18T20:15:01.000Z', 0, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:15:01.000Z', 1, undefined, { decAfterInc: 1, maxDecreases: 3 });
          runTest(50, '2016-08-18T20:15:01.000Z', 2, undefined, { decAfterInc: 1, maxDecreases: 3 });

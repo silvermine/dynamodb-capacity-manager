@@ -1,5 +1,5 @@
 {
-  "name": "dynamodb-capacity-manager",
+  "name": "@silvermine/dynamodb-capacity-manager",
   "version": "0.9.1",
   "description": "Library for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage. Can be run as a Lambda function.",
   "main": "src/index.js",
@@ -31,10 +31,10 @@
     "underscore": "1.8.3"
   },
   "devDependencies": {
+    "@silvermine/eslint-config": "1.5.0",
     "aws-sdk": "2.354.0",
     "coveralls": "3.0.2",
-    "eslint": "3.3.1",
-    "eslint-config-silvermine": "1.1.2",
+    "eslint": "3.16.1",
     "expect.js": "0.3.1",
     "grunt": "1.0.3",
     "grunt-eslint": "19.0.0",

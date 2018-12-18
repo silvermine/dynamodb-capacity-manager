@@ -46,7 +46,7 @@ Here's an example of how you can write a script that uses this library:
 ```js
 'use strict';
 
-var DCM = require('./src/index.js'),
+var DCM = require('@silvermine/dynamodb-capacity-manager'),
     builder = new DCM.Builder(),
     dcm;
 

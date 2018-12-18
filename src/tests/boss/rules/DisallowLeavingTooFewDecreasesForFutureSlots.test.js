@@ -43,7 +43,8 @@ describe('DisallowLeavingTooFewDecreasesForFutureSlots', function() {
 
       it('does nothing when you have enough decreases left for the number of slots left - default 4', function() {
          // six hour slots
-         // slot one - 00:00 to 06:00 - can only use first decrease (only can decrease if have zero previous decreases)
+         // slot one - 00:00 to 06:00 - can only use first decrease (only can decrease if
+         // have zero previous decreases)
          runTest(50, '2016-08-18T00:10:01.000Z', 0, undefined);
 
          // slot two - 06:00 to 12:00 - can use first two decreases
@@ -64,7 +65,8 @@ describe('DisallowLeavingTooFewDecreasesForFutureSlots', function() {
 
       it('does nothing when you have enough decreases left for the number of slots left - custom 3', function() {
          // eight hour slots
-         // slot one - 00:00 to 08:00 - can only use first decrease (only can decrease if have zero previous decreases)
+         // slot one - 00:00 to 08:00 - can only use first decrease (only can decrease if
+         // have zero previous decreases)
          runTest(50, '2016-08-18T00:10:01.000Z', 0, undefined); // none previous, using the first now
 
          // slot two - 08:00 to 16:00 - can use first two decreases
