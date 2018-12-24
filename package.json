@@ -1,6 +1,6 @@
 {
   "name": "@silvermine/dynamodb-capacity-manager",
-  "version": "0.9.1",
+  "version": "1.0.1",
   "description": "Library for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage. Can be run as a Lambda function.",
   "main": "src/index.js",
   "scripts": {
