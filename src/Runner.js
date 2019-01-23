@@ -2,6 +2,7 @@
 
 var _ = require('underscore'),
     Q = require('q'),
+    moment = require('moment'),
     AWS = require('aws-sdk'),
     DCM = require('./index'),
     Boss = require('./boss/DecisionMaker'),
@@ -242,6 +243,15 @@ module.exports = Class.extend({
           boss = new Boss(resourceConfig),
           provisioning, usage, throttling, newCapacity;
 
+      // This check would be better as a rule for the Boss. However, since rules don't
+      // currently have access to the resource, this will be a fairly major adjustment.
+      // Therefore, putting this "rule" here until the rules are refactored (see the TODO
+      // below).
+      if (this._shouldDisallowChangesSoonAfterTableCreation(resourceConfig, resource)) {
+         resource.updatedCapacity = resource.provisioning.currentCapacity;
+         return resource;
+      }
+
       // TODO: we should not need to map between the data format we're using here for
       // provisioning and the data format the boss expects. This class is using our
       // standard naming convention, which starts variables with a lower case number. The
@@ -266,6 +276,20 @@ module.exports = Class.extend({
 
       resource.updatedCapacity = newCapacity;
       return resource;
+   },
+
+   _shouldDisallowChangesSoonAfterTableCreation: function(config, resource, currentTime) {
+      var earliestTableCanBeAdjustedAfterCreation;
+
+      if (!config.MinimumMinutesBeforeAdjustingNewTable || _.isUndefined(resource.tableCreationDateTime)) {
+         return false;
+      }
+
+      currentTime = currentTime || moment();
+      earliestTableCanBeAdjustedAfterCreation = moment(resource.tableCreationDateTime)
+         .add(config.MinimumMinutesBeforeAdjustingNewTable, 'minutes');
+
+      return moment(currentTime).isBefore(earliestTableCanBeAdjustedAfterCreation);
    },
 
    _convertToChanges: function(resources) {

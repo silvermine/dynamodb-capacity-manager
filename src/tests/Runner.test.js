@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('underscore'),
+    moment = require('moment'),
     expect = require('expect.js'),
     Runner = require('../Runner');
 
@@ -65,6 +66,50 @@ describe('Runner', function() {
          expect(runner._removeExcludedResources(resources))
             .to
             .eql(_.without(resources, tbl1W, tbl1idW, tbl2W, tbl2idW, tbl1R, tbl2idR));
+      });
+
+   });
+
+   describe('_shouldDisallowChangesSoonAfterTableCreation', function() {
+
+      function runTest(created, time, expectation, configOpts) {
+         var config, resource;
+
+         configOpts = configOpts || {};
+
+         config = {
+            MinimumMinutesBeforeAdjustingNewTable: configOpts.minutesToWait,
+         };
+
+         resource = {
+            tableCreationDateTime: created,
+         };
+
+         expect(runner._shouldDisallowChangesSoonAfterTableCreation(config, resource, moment(time)))
+            .to
+            .be(expectation);
+      }
+
+      it('allows changes immediately after table creation with no config', function() {
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:01:00.000Z', false);
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:01:01.000Z', false);
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:02:00.000Z', false);
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:40:00.000Z', false);
+      });
+
+      it('disallows changes within the first N minutes of table creation', function() {
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:00:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:01:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:02:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:03:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:03:00.000Z', false, { minutesToWait: 2 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:04:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:05:00.000Z', true, { minutesToWait: 5 });
+         runTest('2016-08-18T20:01:00.000Z', '2016-08-18T20:06:00.000Z', false, { minutesToWait: 5 });
+      });
+
+      it('allows changes when tableCreationDateTime is not populated', function() {
+         runTest(undefined, '2016-08-18T20:01:00.000Z', false, { minutesToWait: 5 });
       });
 
    });
