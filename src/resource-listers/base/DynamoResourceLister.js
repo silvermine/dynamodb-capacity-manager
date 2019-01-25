@@ -39,8 +39,8 @@ module.exports = Class.extend({
             resources.push(this.convertTableToResource(resp.Table, constants.WRITE));
 
             _.each(resp.Table.GlobalSecondaryIndexes, function(index) {
-               resources.push(this.convertIndexToResource(resp.Table.TableName, index, constants.READ));
-               resources.push(this.convertIndexToResource(resp.Table.TableName, index, constants.WRITE));
+               resources.push(this.convertIndexToResource(resp.Table, index, constants.READ));
+               resources.push(this.convertIndexToResource(resp.Table, index, constants.WRITE));
             }.bind(this));
 
             return resources;
@@ -52,6 +52,7 @@ module.exports = Class.extend({
          resourceType: 'table',
          name: resourceUtils.makeResourceName(table.TableName),
          tableName: table.TableName,
+         tableCreationDateTime: table.CreationDateTime,
          capacityType: capacityType,
          provisioning: {
             lastIncrease: table.ProvisionedThroughput.LastIncreaseDateTime,
@@ -62,11 +63,23 @@ module.exports = Class.extend({
       };
    },
 
-   convertIndexToResource: function(tableName, index, capacityType) {
+   convertIndexToResource: function(tableOrName, index, capacityType) {
+      var table = tableOrName;
+
+      if (_.isString(table)) {
+         console.log(
+            'WARNING: Calling convertIndexToResource with a string table name has been '
+            + 'deprecated. Please provide a TableDescription instead. '
+            + '(https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TableDescription.html)'
+         );
+         table = { TableName: table };
+      }
+
       return {
          resourceType: 'index',
-         name: resourceUtils.makeResourceName(tableName, index.IndexName),
-         tableName: tableName,
+         name: resourceUtils.makeResourceName(table.TableName, index.IndexName),
+         tableName: table.TableName,
+         tableCreationDateTime: table.CreationDateTime,
          indexName: index.IndexName,
          capacityType: capacityType,
          provisioning: {

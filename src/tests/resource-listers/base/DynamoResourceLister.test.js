@@ -140,6 +140,7 @@ describe('DynamoResourceLister', function() {
                      resourceType: 'table',
                      name: 'Tbl1',
                      tableName: 'Tbl1',
+                     tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
                      capacityType: constants.READ,
                      provisioning: {
                         lastIncrease: 1492346261,
@@ -152,6 +153,7 @@ describe('DynamoResourceLister', function() {
                      resourceType: 'table',
                      name: 'Tbl1',
                      tableName: 'Tbl1',
+                     tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
                      capacityType: constants.WRITE,
                      provisioning: {
                         lastIncrease: 1492346261,
@@ -164,6 +166,7 @@ describe('DynamoResourceLister', function() {
                      resourceType: 'index',
                      name: 'Tbl1::Name',
                      tableName: 'Tbl1',
+                     tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
                      indexName: 'Name',
                      capacityType: constants.READ,
                      provisioning: {
@@ -177,6 +180,7 @@ describe('DynamoResourceLister', function() {
                      resourceType: 'index',
                      name: 'Tbl1::Name',
                      tableName: 'Tbl1',
+                     tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
                      indexName: 'Name',
                      capacityType: constants.WRITE,
                      provisioning: {
@@ -199,6 +203,7 @@ describe('DynamoResourceLister', function() {
             resourceType: 'table',
             name: 'Tbl1',
             tableName: 'Tbl1',
+            tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
             capacityType: constants.READ,
             provisioning: {
                lastIncrease: 1492346261,
@@ -214,6 +219,7 @@ describe('DynamoResourceLister', function() {
             resourceType: 'table',
             name: 'Tbl1',
             tableName: 'Tbl1',
+            tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
             capacityType: constants.WRITE,
             provisioning: {
                lastIncrease: 1492346261,
@@ -229,11 +235,12 @@ describe('DynamoResourceLister', function() {
    describe('convertIndexToResource', function() {
 
       it('converts index to resource - read', function() {
-         expect(lister.convertIndexToResource('Tbl1', mockTbl1NameIndex, constants.READ)).to.eql({
+         expect(lister.convertIndexToResource(mockTbl1, mockTbl1NameIndex, constants.READ)).to.eql({
             resourceType: 'index',
             name: 'Tbl1::Name',
             tableName: 'Tbl1',
             indexName: 'Name',
+            tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
             capacityType: constants.READ,
             provisioning: {
                lastIncrease: 1492546261,
@@ -245,11 +252,48 @@ describe('DynamoResourceLister', function() {
       });
 
       it('converts index to resource - write', function() {
+         expect(lister.convertIndexToResource(mockTbl1, mockTbl1NameIndex, constants.WRITE)).to.eql({
+            resourceType: 'index',
+            name: 'Tbl1::Name',
+            tableName: 'Tbl1',
+            indexName: 'Name',
+            tableCreationDateTime: 'Mon Apr 18 2017 16:46:37 GMT-0400 (EDT)',
+            capacityType: constants.WRITE,
+            provisioning: {
+               lastIncrease: 1492546261,
+               lastDecrease: 1492241142,
+               numberOfDecreasesToday: 2,
+               currentCapacity: 12,
+            },
+         });
+      });
+
+      // DEPRECATED
+      it('converts index to resource using string table name - read', function() {
+         expect(lister.convertIndexToResource('Tbl1', mockTbl1NameIndex, constants.READ)).to.eql({
+            resourceType: 'index',
+            name: 'Tbl1::Name',
+            tableName: 'Tbl1',
+            indexName: 'Name',
+            tableCreationDateTime: undefined,
+            capacityType: constants.READ,
+            provisioning: {
+               lastIncrease: 1492546261,
+               lastDecrease: 1492241142,
+               numberOfDecreasesToday: 2,
+               currentCapacity: 8,
+            },
+         });
+      });
+
+      // DEPRECATED
+      it('converts index to resource using string table name - write', function() {
          expect(lister.convertIndexToResource('Tbl1', mockTbl1NameIndex, constants.WRITE)).to.eql({
             resourceType: 'index',
             name: 'Tbl1::Name',
             tableName: 'Tbl1',
             indexName: 'Name',
+            tableCreationDateTime: undefined,
             capacityType: constants.WRITE,
             provisioning: {
                lastIncrease: 1492546261,
