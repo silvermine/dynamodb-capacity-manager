@@ -4,6 +4,7 @@
   "description": "Library for monitoring throughput on DynamoDB tables and adjusting it for you based on real-time usage. Can be run as a Lambda function.",
   "main": "src/index.js",
   "scripts": {
+    "commitlint": "commitlint --from e1f08dc",
     "test": "check-node-version --npm 6.13.4 && grunt standards && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec 'src/tests/**/*.test.js'"
   },
   "author": "Jeremy Thomerson",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@silvermine/eslint-config": "3.0.0-rc.0",
+    "@silvermine/standardization": "1.0.1",
     "aws-sdk": "2.354.0",
     "check-node-version": "4.0.3",
     "coveralls": "3.0.2",
