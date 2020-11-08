@@ -18,15 +18,19 @@ every minute.
 
 The basic flow of execution is:
 
-   * List the resources (tables and indexes) that it needs to operate on. This list might be all the tables (and their associated indexes):
+   * List the resources (tables and indexes) that it needs to operate on. This list might
+     be all the tables (and their associated indexes):
       * in a CloudFormation stack, or
       * in your account, or
       * a specific list of tables and indexes that you determine and give it
    * Find out what the currently-provisioned capacity for these resources is
-   * Retrieve CloudWatch statistics on the recent consumed capacity and throttle events for these resources
-   * Then apply a series of rules to take the recent consumption and throttle data to determine if an update should be made
+   * Retrieve CloudWatch statistics on the recent consumed capacity and throttle events for
+    these resources
+   * Then apply a series of rules to take the recent consumption and throttle data to determine
+     if an update should be made
       * These rules include running a linear regression on the trajectory of your recent consumption
-      * Then applying your configuration of minimums, maximums, and other inputs for the rules to create a new target capacity
+      * Then applying your configuration of minimums, maximums, and other inputs for the rules
+        to create a new target capacity
    * Then, if updates are needed, apply those updates
 
 Each rule (including the forecasting) has a number of configuration parameters
