@@ -39,7 +39,7 @@ module.exports = function(grunt) {
       if (configFile) {
          getConfig = Q.ninvoke(fs, 'readFile', configFile)
             .then(function(configData) {
-               return yaml.safeLoad(configData);
+               return yaml.load(configData);
             });
       }
 
