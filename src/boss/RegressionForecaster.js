@@ -40,6 +40,12 @@ module.exports = Class.extend({
 
       lastSeconds = lastPoint[0];
 
+      // Underscore will now make descending ranges if provided with a negative stop. To
+      // ensure we don't add extra slots, we need to avoid making a descending range.
+      if (additionalMinutes < 0) {
+         return;
+      }
+
       _.each(_.range(1, additionalMinutes + 1), function() {
          var seconds = lastSeconds + 60; // Add 1 minute
 
