@@ -5,7 +5,10 @@
   "main": "src/index.js",
   "scripts": {
     "commitlint": "commitlint --from e1f08dc",
-    "test": "check-node-version --npm 6.13.4 && grunt standards && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec 'src/tests/**/*.test.js'"
+    "test": "check-node-version --npm 8.5.5 && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- -R spec 'src/tests/**/*.test.js'",
+    "markdownlint": "markdownlint -c .markdownlint.json '{,!(node_modules)/**/}*.md'",
+    "eslint": "eslint .",
+    "standards": "npm run markdownlint && npm run eslint"
   },
   "author": "Jeremy Thomerson",
   "license": "MIT",
@@ -33,14 +36,11 @@
   },
   "devDependencies": {
     "@silvermine/eslint-config": "3.0.0-rc.0",
-    "@silvermine/standardization": "1.0.1",
+    "@silvermine/standardization": "2.0.0",
     "aws-sdk": "2.354.0",
-    "check-node-version": "4.0.3",
     "coveralls": "3.0.2",
     "eslint": "6.8.0",
     "expect.js": "0.3.1",
-    "grunt": "1.0.3",
-    "grunt-eslint": "22.0.0",
     "istanbul": "0.4.5",
     "js-yaml": "3.8.4",
     "mocha": "5.2.0",
